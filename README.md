@@ -1,1 +1,1 @@
-This is it, madafucka. 
+This is it. 
