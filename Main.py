@@ -1,7 +1,12 @@
-""" 
-A ball bouncing around the screen, off the walls, with dynamic speed.
-Requires the file "Ball.bmp" to be in the program directory.
-"""
+#Ishan Sharma and Aryan Kukreja
+#For Mr. Cope
+#April 23, 2016
+
+#Main.py
+#An RTS game
+
+#Input: Mouse clicks
+#Output: Gameplay
 import pygame
 from pygame.locals import * 
 pygame.init()
