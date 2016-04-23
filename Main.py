@@ -7,6 +7,7 @@
 
 #Input: Mouse clicks
 #Output: Gameplay
+
 import pygame
 from pygame.locals import * 
 pygame.init()
@@ -17,7 +18,7 @@ background = pygame.Surface(screen.get_size()).convert()
 background.fill((242, 242, 242))
 
 back = pygame.image.load("Game initial sketch.png").convert()
-#img = pygame.image.load("small_ball.png").convert()
+ball = pygame.image.load("small_ball.png").convert()
 img = []
 
 font = pygame.font.SysFont("helvetica", 48) #system fonts, needs font name
@@ -33,13 +34,13 @@ while keep_going:
     clock.tick(30)
     for ev in pygame.event.get():
         if ev.type == QUIT:
-            keep_going = False
+            quit()
         elif pygame.mouse.get_pressed()[0]:
             x=ev.pos[0]
             y=ev.pos[1]
             x-=35/2
             y-=35/2
-            img.append([pygame.image.load("small_ball.png").convert(),x,y])
+            img.append([ball,x,y])
     #print(x,y)
     screen.blit(background, (0,0))
     screen.blit(back, (0,154))
