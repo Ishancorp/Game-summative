@@ -36,10 +36,8 @@ while keep_going:
         if ev.type == QUIT:
             quit()
         elif pygame.mouse.get_pressed()[0]:
-            x=ev.pos[0]
-            y=ev.pos[1]
-            x-=35/2
-            y-=35/2
+            x=ev.pos[0]-(ball.get_width()/2)
+            y=ev.pos[1]-(ball.get_height()/2)
             img.append([ball,x,y])
     #print(x,y)
     screen.blit(background, (0,0))
