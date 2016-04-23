@@ -17,7 +17,8 @@ background = pygame.Surface(screen.get_size()).convert()
 background.fill((242, 242, 242))
 
 back = pygame.image.load("Game initial sketch.png").convert()
-img = pygame.image.load("small_ball.png").convert()
+#img = pygame.image.load("small_ball.png").convert()
+img = []
 
 font = pygame.font.SysFont("helvetica", 48) #system fonts, needs font name
 field_value = "World War Sea"
@@ -36,12 +37,15 @@ while keep_going:
         elif pygame.mouse.get_pressed()[0]:
             x=ev.pos[0]
             y=ev.pos[1]
-            x-=img.get_width()/2
-            y-=img.get_height()/2
-    print(x,y)
+            x-=35/2
+            y-=35/2
+            img.append([pygame.image.load("small_ball.png").convert(),x,y])
+    #print(x,y)
     screen.blit(background, (0,0))
     screen.blit(back, (0,154))
-    screen.blit(img, (x,y))
+    for image in img:
+        screen.blit(image[0], (image[1],image[2]))
+    #print(img)
     screen.blit(field, (60, 40))
     pygame.display.flip()
 
