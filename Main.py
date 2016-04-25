@@ -17,7 +17,7 @@ screen = pygame.display.set_mode((1015, 770))
 
 #Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert() #the background pic needs to be 1015x595 px. 
-ball = pygame.image.load("small_ball.png").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
+ball = pygame.image.load("tank.gif").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
 img = []
 
 #Setting up some colours
@@ -34,9 +34,9 @@ background = pygame.Surface(screen.get_size()).convert()
 background.fill(light_gray)
 border=pygame.Surface((122,bottom_bounds+2)).convert()
 border.fill(dark_gray)
-main_border=pygame.Surface((527,bottom_bounds+2)).convert()
+main_border=pygame.Surface((477,bottom_bounds+2)).convert()
 main_border.fill(dark_gray)
-display = pygame.Surface((525,bottom_bounds)).convert()
+display = pygame.Surface((475,bottom_bounds)).convert()
 display.fill(gray)
 
 #fonts
@@ -140,25 +140,26 @@ while keep_going:
     screen.blit(missile_surface, (140,top_bounds))
     screen.blit(border, (269,top_bounds-1))
     screen.blit(seamine_surface, (270,top_bounds))
-    screen.blit(main_border, (469,top_bounds-1))
-    screen.blit(display, (470,top_bounds))
+    screen.blit(main_border, (519,top_bounds-1))
+    screen.blit(display, (520,top_bounds))
 
-    scale=40
+    scale=150
+    scale2=50
     top_bounds=100
-    screen.blit(tank_text, (scale, top_bounds))
-    screen.blit(missile_text, (110+scale, top_bounds))
-    screen.blit(mine_text, (250+scale, top_bounds))
-    screen.blit(tank_cost, (scale, top_bounds+15))
-    screen.blit(missile_cost, (scale+110, top_bounds+15))
-    screen.blit(mine_cost, (250+scale, top_bounds+15))
-    screen.blit(islandsdestroyed_text, (500, top_bounds+15))
-    screen.blit(chance_text, (750, top_bounds+15))
-    screen.blit(shipsdestroyed_text, (500, top_bounds-25))
-    screen.blit(shipsremaining_text, (750, top_bounds-25))
-    screen.blit(money_text, (500, top_bounds-65))
-    screen.blit(numweapons_text, (750, top_bounds-65))
+    screen.blit(tank_text, (scale2, top_bounds))
+    screen.blit(missile_text, (110+scale2, top_bounds))
+    screen.blit(mine_text, (250+scale2, top_bounds))
+    screen.blit(tank_cost, (scale2, top_bounds+15))
+    screen.blit(missile_cost, (scale2+110, top_bounds+15))
+    screen.blit(mine_cost, (250+scale2, top_bounds+15))
+    screen.blit(islandsdestroyed_text, (400+scale, top_bounds+15))
+    screen.blit(chance_text, (650+scale, top_bounds+15))
+    screen.blit(shipsdestroyed_text, (400+scale, top_bounds-25))
+    screen.blit(shipsremaining_text, (650+scale, top_bounds-25))
+    screen.blit(money_text, (400+scale, top_bounds-65))
+    screen.blit(numweapons_text, (650+scale, top_bounds-65))
 
-    screen.blit(ball, (scale+3,50))
+    screen.blit(ball, (scale2+3,50))
     pygame.display.flip()
 
 pygame.display.quit()
