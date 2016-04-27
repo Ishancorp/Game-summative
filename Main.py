@@ -1,12 +1,13 @@
-#Ishan Sharma and Aryan Kukreja
-#For Mr. Cope
-#April 23, 2016
+# World War Sea | A Python (Pygame) Game
+# By Aryan Kukreja and Ishan Sharma
+# Submitted to Mr. Cope on Friday, May 20th, 2016
 
-#Main.py
-#An RTS game
+# Main.py
+# An RTS game
+# Refer
 
-#Input: Mouse clicks
-#Output: Gameplay
+# Input: Mouse clicks
+# Output: Gameplay
 
 import pygame
 from pygame.locals import *
@@ -15,20 +16,21 @@ pygame.init()
 screen = pygame.display.set_mode((1015, 770))
 
 
-#Loading images and initializing list to store them in
-back = pygame.image.load("Game initial sketch.png").convert() #the background pic needs to be 1015x595 px. 
-ball = pygame.image.load("tank.gif").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile=pygame.image.load("missile.png").convert()
+# Loading images and initializing list to store them in
+back = pygame.image.load("Game Initial Sketch.png").convert()  # the background pic needs to be 1015x595 px.
+ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
+missile = pygame.image.load("Missle Launcher.png").convert()
+mine = pygame.image.load("Sea Mine.png")
 img = []
 
-#Setting up some colours
+# Setting up some colours
 dark_gray=(75,75,75)
-pressed=(75,125,230)
+pressed=(125,223,150)
 gray=(200,200,200)
 light_gray=(242, 242, 242)
 black=(0,0,0)
 
-#setting up Surfaces for the menu, along with the menu backdrop
+# setting up Surfaces for the menu, along with the menu backdrop
 
 bottom_bounds=155
 background = pygame.Surface(screen.get_size()).convert()
@@ -40,7 +42,7 @@ main_border.fill(dark_gray)
 display = pygame.Surface((475,bottom_bounds)).convert()
 display.fill(gray)
 
-#fonts
+# fonts
 font = pygame.font.SysFont("helvetica", 14)
 tank_text = font.render("Tank", True, black)
 tank_cost = font.render("$1 000", True, black)
@@ -49,19 +51,19 @@ missile_cost = font.render("$10 000", True, black)
 mine_text = font.render("Sea Mine", True, black)
 mine_cost = font.render("$50 000", True, black)
 
-tank_pressed=True
-missile_pressed=False
-seamine_pressed=False
-#setting up coordinate variables
-x=0
-y=0
-money=0
-chances=3
-pause=False
-ships_destroyed=0
-ships_remaining=0
+tank_pressed = True
+missile_pressed = False
+seamine_pressed = False
+# setting up coordinate variables
+x = 0
+y = 0
+money = 0
+chances = 3
+pause = False
+ships_destroyed = 0
+ships_remaining = 0
 
-#Game engine
+# Game engine
 clock = pygame.time.Clock()
 keep_going = True
 while keep_going:
@@ -97,22 +99,25 @@ while keep_going:
             else: #if the main gameplay part is pressed
                 overlap=False
                 for image in img:
-                    if image[1]==x and image[2]==y: #if the 
+                    if (image[1]==x and image[2]==y) or (sprite_type=="M" and (image[1]==x or image[1]==x-35 or image[1]==x-70) and image[2]==y) or (missile_pressed and (image[1]==x or image[1]==x+35 or image[1]==x+70) and image[2]==y): #if the
                         overlap=True
                         print("Overlap")
                 #overlap is true if the x and y of the sprite is already covered
                 if overlap==False:
                     item=0
-                    sprite_type=
+                    sprite_type=""
                     if tank_pressed:
                         item=ball
-                        sprite_type="Tank"
+                        sprite_type="T"
                     elif missile_pressed:
                         item=missile
-                        sprite_type="Missile"
+                        sprite_type="M"
+                    elif seamine_pressed:
+                        item=mine
+                        sprite_type="S"
                     img.append([item,x,y,sprite_type])
     #print(x,y)
-    
+
     tank_surface = pygame.Surface((120,bottom_bounds)).convert()
     missile_surface = pygame.Surface((120,bottom_bounds)).convert()
     seamine_surface = pygame.Surface((120,bottom_bounds)).convert()
@@ -128,14 +133,14 @@ while keep_going:
         seamine_surface.fill(gray)
     else:
         seamine_surface.fill(pressed)
-    
+
     money_text = font.render("Money: $"+str(money), True, black)
     numweapons_text = font.render("Weapons: "+str(len(img)), True, black)
     islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
     chance_text = font.render("Chances: "+str(chances), True, black)
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
     shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
-    
+
     #Blitting
     screen.blit(background, (0,0))
     screen.blit(back, (0,175))
@@ -169,6 +174,8 @@ while keep_going:
     screen.blit(numweapons_text, (650+scale, top_bounds-65))
 
     screen.blit(ball, (scale2+3,50))
+    screen.blit(missile, (scale2+98,50))
+    screen.blit(mine, (scale2+260, 50))
     pygame.display.flip()
 
 pygame.display.quit()
