@@ -18,11 +18,12 @@ screen = pygame.display.set_mode((1015, 770))
 #Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert() #the background pic needs to be 1015x595 px. 
 ball = pygame.image.load("tank.gif").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
+missile=pygame.image.load("missile.png").convert()
 img = []
 
 #Setting up some colours
 dark_gray=(75,75,75)
-pressed=(125,125,125)
+pressed=(75,125,230)
 gray=(200,200,200)
 light_gray=(242, 242, 242)
 black=(0,0,0)
@@ -101,7 +102,15 @@ while keep_going:
                         print("Overlap")
                 #overlap is true if the x and y of the sprite is already covered
                 if overlap==False:
-                    img.append([ball,x,y])
+                    item=0
+                    sprite_type=
+                    if tank_pressed:
+                        item=ball
+                        sprite_type="Tank"
+                    elif missile_pressed:
+                        item=missile
+                        sprite_type="Missile"
+                    img.append([item,x,y,sprite_type])
     #print(x,y)
     
     tank_surface = pygame.Surface((120,bottom_bounds)).convert()
