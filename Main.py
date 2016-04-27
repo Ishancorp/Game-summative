@@ -97,19 +97,19 @@ while keep_going:
             else: #if the main gameplay part is pressed
                 overlap=False
                 for image in img:
-                    if image[1]==x and image[2]==y: #if the 
+                    if (image[1]==x and image[2]==y) or (sprite_type=="M" and (image[1]==x or image[1]==x-35 or image[1]==x-70) and image[2]==y) or (missile_pressed and (image[1]==x or image[1]==x+35 or image[1]==x+70) and image[2]==y): #if the 
                         overlap=True
                         print("Overlap")
                 #overlap is true if the x and y of the sprite is already covered
                 if overlap==False:
                     item=0
-                    sprite_type=
+                    sprite_type=""
                     if tank_pressed:
                         item=ball
-                        sprite_type="Tank"
+                        sprite_type="T"
                     elif missile_pressed:
                         item=missile
-                        sprite_type="Missile"
+                        sprite_type="M"
                     img.append([item,x,y,sprite_type])
     #print(x,y)
     
@@ -169,6 +169,7 @@ while keep_going:
     screen.blit(numweapons_text, (650+scale, top_bounds-65))
 
     screen.blit(ball, (scale2+3,50))
+    screen.blit(missile, (scale2+98,50))
     pygame.display.flip()
 
 pygame.display.quit()
