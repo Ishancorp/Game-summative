@@ -12,13 +12,14 @@ import pygame
 from pygame.locals import *
 
 pygame.init()
-screen = pygame.display.set_mode((1015, 770))
+screen = pygame.display.set_mode((1015, 768))
 
 
 #Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert() #the background pic needs to be 1015x595 px. 
 ball = pygame.image.load("tank.gif").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
 missile=pygame.image.load("missile.png").convert()
+norm_enemy_ship=pygame.image.load("EnemyShip1.png").convert()
 img = []
 
 #Setting up some colours
@@ -39,6 +40,8 @@ main_border=pygame.Surface((477,bottom_bounds+2)).convert()
 main_border.fill(dark_gray)
 display = pygame.Surface((475,bottom_bounds)).convert()
 display.fill(gray)
+white_surface = pygame.Surface((1015,173)).convert()
+white_surface.fill((255,255,255))
 
 #fonts
 font = pygame.font.SysFont("helvetica", 14)
@@ -60,6 +63,9 @@ chances=3
 pause=False
 ships_destroyed=0
 ships_remaining=0
+sprite_type=""
+y_enemy=-75
+x_enemy=100
 
 #Game engine
 clock = pygame.time.Clock()
@@ -97,13 +103,12 @@ while keep_going:
             else: #if the main gameplay part is pressed
                 overlap=False
                 for image in img:
-                    if (image[1]==x and image[2]==y) or (sprite_type=="M" and (image[1]==x or image[1]==x-35 or image[1]==x-70) and image[2]==y) or (missile_pressed and (image[1]==x or image[1]==x+35 or image[1]==x+70) and image[2]==y): #if the 
+                    if ((image[1]==x and image[2]==y)) or ((sprite_type=="M" and (image[1]==x or image[1]==x-35 or image[1]==x-70) and image[2]==y)) or (missile_pressed and (image[1]==x or image[1]==x+35 or image[1]==x+70) and image[2]==y): #if the 
                         overlap=True
                         print("Overlap")
                 #overlap is true if the x and y of the sprite is already covered
                 if overlap==False:
                     item=0
-                    sprite_type=""
                     if tank_pressed:
                         item=ball
                         sprite_type="T"
@@ -135,14 +140,29 @@ while keep_going:
     chance_text = font.render("Chances: "+str(chances), True, black)
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
     shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
-    
+    speed_enemy=1
+    if pause==False:
+        if y_enemy<100 or x_enemy>=(screen.get_size()[0]-200):
+            y_enemy+=speed_enemy
+            if x_enemy==(screen.get_size()[0]-200):
+                norm_enemy_ship=pygame.transform.rotate(norm_enemy_ship,-90)
+                x_enemy+=10
+                y_enemy+=10
+        elif y_enemy==100:
+            norm_enemy_ship=pygame.transform.rotate(norm_enemy_ship,90)
+            x_enemy+=speed_enemy
+            y_enemy+=175
+        else:
+            x_enemy+=speed_enemy
     #Blitting
     screen.blit(background, (0,0))
-    screen.blit(back, (0,175))
+    screen.blit(back, (0,173))
     for image in img:
         screen.blit(image[0], (image[1],image[2]))
+    screen.blit(norm_enemy_ship,(x_enemy,y_enemy))
     #print(img)
     top_bounds=10
+    screen.blit(white_surface,(0,0))
     screen.blit(border, (9,top_bounds-1))
     screen.blit(tank_surface, (10,top_bounds))
     screen.blit(border, (139,top_bounds-1))
