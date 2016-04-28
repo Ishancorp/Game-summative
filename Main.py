@@ -19,8 +19,8 @@ screen = pygame.display.set_mode((1015, 768))
 #Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert() #the background pic needs to be 1015x595 px. 
 ball = pygame.image.load("tank.gif").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile=pygame.image.load("missile.png").convert()
-norm_enemy_ship=pygame.image.load("EnemyShip1.png").convert()
+missile=pygame.image.load("missile.gif").convert()
+norm_enemy_ship=pygame.image.load("enemy ship.gif").convert()
 img = []
 
 #Setting up some colours
@@ -161,10 +161,18 @@ while keep_going:
     screen.blit(background, (0,0))
     screen.blit(back, (0,173))
     for image in img:
-        if y_enemy-image[2]==0:
-            angle=math.atan((x_enemy-image[1])/(y_enemy-image[2]))
+        if image[3]=="T":
+            try:
+                math.atan((x_enemy-image[1])/(y_enemy-image[2]))
+            except:
+                angle=0
+                image[0]=pygame.transform.rotate(image[0],180)
+            else:
+                angle=math.atan((x_enemy-image[1])/(y_enemy-image[2]))*180/3.14
         else:
             angle=0
+        if image[2]<=y_enemy:
+            angle+=180
         screen.blit(pygame.transform.rotate(image[0],angle),(image[1],image[2]))
     screen.blit(norm_enemy_ship,(x_enemy,y_enemy))
     #print(img)
