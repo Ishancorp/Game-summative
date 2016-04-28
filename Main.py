@@ -1,10 +1,9 @@
-# World War Sea | A Python (Pygame) Game
-# By Aryan Kukreja and Ishan Sharma
-# Submitted to Mr. Cope on Friday, May 20th, 2016
+# Aryan Kukreja and Ishan Sharma
+# For Mr. Cope
+# April 23, 2016
 
 # Main.py
 # An RTS game
-# Refer
 
 # Input: Mouse clicks
 # Output: Gameplay
@@ -29,6 +28,7 @@ pressed=(125,223,150)
 gray=(200,200,200)
 light_gray=(242, 242, 242)
 black=(0,0,0)
+poor = (200,0,0)
 
 # setting up Surfaces for the menu, along with the menu backdrop
 
@@ -51,13 +51,17 @@ missile_cost = font.render("$10 000", True, black)
 mine_text = font.render("Sea Mine", True, black)
 mine_cost = font.render("$50 000", True, black)
 
+tank_price = 1000
+mine_price = 50000
+missile_launcher = 10000
+
 tank_pressed = True
 missile_pressed = False
 seamine_pressed = False
 # setting up coordinate variables
 x = 0
 y = 0
-money = 0
+money = 11000
 chances = 3
 pause = False
 ships_destroyed = 0
@@ -102,20 +106,34 @@ while keep_going:
                     if (image[1]==x and image[2]==y) or (sprite_type=="M" and (image[1]==x or image[1]==x-35 or image[1]==x-70) and image[2]==y) or (missile_pressed and (image[1]==x or image[1]==x+35 or image[1]==x+70) and image[2]==y): #if the
                         overlap=True
                         print("Overlap")
-                #overlap is true if the x and y of the sprite is already covered
-                if overlap==False:
-                    item=0
-                    sprite_type=""
+                # overlap is true if the x and y of the sprite is already covered
+                if overlap == False:
+                    item = 0
+                    sprite_type = ""
                     if tank_pressed:
-                        item=ball
-                        sprite_type="T"
+                        if (tank_price - money) > 0:
+                            break
+                        else:
+                            item = ball
+                            sprite_type = "T"
+                            money -= tank_price
+                            img.append([item,x,y,sprite_type])
                     elif missile_pressed:
-                        item=missile
-                        sprite_type="M"
+                        if (missile_launcher - money) > 0:
+                            break
+                        else:
+                            item=missile
+                            sprite_type="M"
+                            money -= missile_launcher
+                            img.append([item,x,y,sprite_type])
                     elif seamine_pressed:
-                        item=mine
-                        sprite_type="S"
-                    img.append([item,x,y,sprite_type])
+                        if (mine_price - money) > 0:
+                            break
+                        else:
+                            item=mine
+                            sprite_type="S"
+                            money -= mine_price
+                            img.append([item,x,y,sprite_type])
     #print(x,y)
 
     tank_surface = pygame.Surface((120,bottom_bounds)).convert()
@@ -123,14 +141,20 @@ while keep_going:
     seamine_surface = pygame.Surface((120,bottom_bounds)).convert()
     if tank_pressed==False:
         tank_surface.fill(gray)
+    elif (tank_price - money) > 0:
+        tank_surface.fill(poor)
     else:
         tank_surface.fill(pressed)
     if missile_pressed==False:
         missile_surface.fill(gray)
+    elif (missile_launcher - money) > 0:
+        missile_surface.fill(poor)
     else:
         missile_surface.fill(pressed)
     if seamine_pressed==False:
         seamine_surface.fill(gray)
+    elif (mine_price - money) > 0:
+        seamine_surface.fill(poor)
     else:
         seamine_surface.fill(pressed)
 
@@ -146,7 +170,7 @@ while keep_going:
     screen.blit(back, (0,175))
     for image in img:
         screen.blit(image[0], (image[1],image[2]))
-    #print(img)
+    # print(img)
     top_bounds=10
     screen.blit(border, (9,top_bounds-1))
     screen.blit(tank_surface, (10,top_bounds))
