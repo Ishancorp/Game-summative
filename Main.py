@@ -10,6 +10,7 @@
 
 import pygame
 from pygame.locals import *
+import math
 
 pygame.init()
 screen = pygame.display.set_mode((1015, 768))
@@ -66,6 +67,7 @@ ships_remaining=0
 sprite_type=""
 y_enemy=-75
 x_enemy=100
+angle=0
 
 #Game engine
 clock = pygame.time.Clock()
@@ -141,6 +143,7 @@ while keep_going:
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
     shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
     speed_enemy=1
+    
     if pause==False:
         if y_enemy<100 or x_enemy>=(screen.get_size()[0]-200):
             y_enemy+=speed_enemy
@@ -158,7 +161,11 @@ while keep_going:
     screen.blit(background, (0,0))
     screen.blit(back, (0,173))
     for image in img:
-        screen.blit(image[0], (image[1],image[2]))
+        if y_enemy-image[2]==0:
+            angle=math.atan((x_enemy-image[1])/(y_enemy-image[2]))
+        else:
+            angle=0
+        screen.blit(pygame.transform.rotate(image[0],angle),(image[1],image[2]))
     screen.blit(norm_enemy_ship,(x_enemy,y_enemy))
     #print(img)
     top_bounds=10
