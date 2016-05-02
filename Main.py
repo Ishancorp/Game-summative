@@ -19,8 +19,8 @@ screen = pygame.display.set_mode((1015, 768))
 #Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert() #the background pic needs to be 1015x595 px. 
 ball = pygame.image.load("tank.gif").convert() #must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile=pygame.image.load("missile.gif").convert()
-norm_enemy_ship=pygame.image.load("enemy ship.gif").convert()
+missile=pygame.image.load("missile.png").convert()
+norm_enemy_ship=pygame.image.load("enemy ship.png").convert()
 img = []
 
 #Setting up some colours
@@ -102,7 +102,7 @@ while keep_going:
                 elif pause==False: #if the game is not paused
                     pause=True
                     print("Paused")
-            else: #if the main gameplay part is pressed
+            elif pause==False and ((y<243 and x>140) or (383<y<453 and x<840) or (595>=y>525 and x>140) or (y>595 and x>840)): #if the main gameplay part is pressed
                 overlap=False
                 for image in img:
                     if ((image[1]==x and image[2]==y)) or ((sprite_type=="M" and (image[1]==x or image[1]==x-35 or image[1]==x-70) and image[2]==y)) or (missile_pressed and (image[1]==x or image[1]==x+35 or image[1]==x+70) and image[2]==y): #if the 
@@ -117,7 +117,7 @@ while keep_going:
                     elif missile_pressed:
                         item=missile
                         sprite_type="M"
-                    img.append([item,x,y,sprite_type])
+                    img.append([item,x,y,sprite_type,0,[]])
     #print(x,y)
     
     tank_surface = pygame.Surface((120,bottom_bounds)).convert()
@@ -145,35 +145,55 @@ while keep_going:
     speed_enemy=1
     
     if pause==False:
-        if y_enemy<100 or x_enemy>=(screen.get_size()[0]-200):
+        if y_enemy<100 or (x_enemy>=(screen.get_size()[0]-200) and y_enemy<350):
             y_enemy+=speed_enemy
+            #print("h")
             if x_enemy==(screen.get_size()[0]-200):
                 norm_enemy_ship=pygame.transform.rotate(norm_enemy_ship,-90)
                 x_enemy+=10
                 y_enemy+=10
-        elif y_enemy==100:
+        elif y_enemy==100 or (y_enemy==350 and x_enemy==(screen.get_size()[0]-190)):
             norm_enemy_ship=pygame.transform.rotate(norm_enemy_ship,90)
             x_enemy+=speed_enemy
-            y_enemy+=175
+            y_enemy+=150
+            #print("o")
+        elif y_enemy==350:
+            norm_enemy_ship=pygame.transform.rotate(norm_enemy_ship,270)
+            x_enemy-=speed_enemy
+            #print("a")
+        elif y_enemy>350 and x_enemy>125:
+            x_enemy-=speed_enemy
+            #print(x_enemy)
+            #print("r")
+        elif x_enemy==125 and y_enemy>350:
+            norm_enemy_ship=pygame.transform.rotate(norm_enemy_ship,90)
+            x_enemy-=0.01
+            #print("e")
+        elif x_enemy<125 and y_enemy>350:
+            y_enemy+=speed_enemy
+            #print("s")
         else:
             x_enemy+=speed_enemy
+            #print("i")
+    #print(y_enemy)
     #Blitting
     screen.blit(background, (0,0))
     screen.blit(back, (0,173))
-    for image in img:
-        if image[3]=="T":
+    for ship_pointer in range(0,len(img)):
+        if img[ship_pointer][3]=="T":
             try:
-                math.atan((x_enemy-image[1])/(y_enemy-image[2]))
+                math.atan((x_enemy-img[ship_pointer][1])/(y_enemy-img[ship_pointer][2]-20))
             except:
                 angle=0
-                image[0]=pygame.transform.rotate(image[0],180)
+                img[ship_pointer][0]=pygame.transform.rotate(img[ship_pointer][0],180)
             else:
-                angle=math.atan((x_enemy-image[1])/(y_enemy-image[2]))*180/3.14
+                angle=math.atan((x_enemy-img[ship_pointer][1])/(y_enemy-img[ship_pointer][2]-20))*180/3.14
         else:
             angle=0
-        if image[2]<=y_enemy:
+        if img[ship_pointer][2]<=y_enemy:
             angle+=180
-        screen.blit(pygame.transform.rotate(image[0],angle),(image[1],image[2]))
+        img[ship_pointer][4]=angle
+        screen.blit(pygame.transform.rotate(img[ship_pointer][0],angle),(img[ship_pointer][1],img[ship_pointer][2]))
     screen.blit(norm_enemy_ship,(x_enemy,y_enemy))
     #print(img)
     top_bounds=10
