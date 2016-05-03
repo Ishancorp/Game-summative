@@ -183,7 +183,7 @@ while keep_going:
             if img[ship_pointer][2] <= y_enemy:
                 angle += 180
             img[ship_pointer][6] += 1
-            if img[ship_pointer][6] == 10:
+            if img[ship_pointer][6] == 5:
                 img[ship_pointer][6] = 0
                 img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
             if True:
