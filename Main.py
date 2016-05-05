@@ -217,6 +217,7 @@ while keep_going:
     screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
 
     # blitting the top part of the screen
+    top_bounds = 10
     screen.blit(white_surface, (0, 0))
     screen.blit(border, (9, top_bounds-1))
     screen.blit(tank_surface, (10, top_bounds))
@@ -226,10 +227,7 @@ while keep_going:
     screen.blit(seamine_surface, (270, top_bounds))
     screen.blit(main_border, (519, top_bounds-1))
     screen.blit(display, (520, top_bounds))
-    screen.blit(ball, (scale+3, 50))
-    screen.blit(missile, (scale+98, 50))
 
-    # blitting the top part of the screen
     scale = 150
     top_bounds = 100
     screen.blit(islandsdestroyed_text, (400+scale, top_bounds+15))
@@ -246,6 +244,8 @@ while keep_going:
     screen.blit(missile_cost, (scale+110, top_bounds+15))
     screen.blit(mine_cost, (250+scale, top_bounds+15))
 
+    screen.blit(ball, (scale+3, 50))
+    screen.blit(missile, (scale+98, 50))
     pygame.display.flip()
 
 pygame.display.quit()
