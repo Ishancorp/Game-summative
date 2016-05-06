@@ -20,7 +20,7 @@ screen = pygame.display.set_mode((1015, 768))
 back = pygame.image.load("Game initial sketch.png").convert()  # the background pic needs to be 1015x595 px.
 ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
 missile = pygame.image.load("missile.png").convert()
-mine = pygame.image.load("small_ball.png")
+mine = pygame.image.load("Army mine.png")
 norm_enemy_ship = pygame.image.load("enemy ship.png").convert()
 bullet = pygame.image.load("projectile.png").convert()
 img = []
@@ -123,7 +123,6 @@ while keep_going:
                     if (image[1] == x and image[2] == y) or (sprite_type == "M" and (image[1] == x or image[1] == x-35 or image[1] == x-70) and image[2] == y) or (missile_pressed and (image[1] == x or image[1] == x+35 or image[1] == x+70) and image[2] == y):
                         overlap = True
                         print("Overlap")
-                print(x, y)
                 # overlap is true if the x and y of the sprite is already covered
                 if not overlap:
                     item = 0
@@ -231,16 +230,15 @@ while keep_going:
                 img[ship_pointer][6] = 0
                 if not pause:
                     img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
-            if True:
-                for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
-                    if not img[ship_pointer][5][bullet_pointer] == None:  # if the bullet actually exists and has not been deleted
-                        if not pause:
-                            img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
-                            img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
-                        if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
-                            screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
-                        else:
-                            img[ship_pointer][5][bullet_pointer]=None
+            for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
+                if not img[ship_pointer][5][bullet_pointer] == None:  # if the bullet actually exists and has not been deleted
+                    if not pause:
+                        img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                        img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                    if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
+                        screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
+                    else:
+                        img[ship_pointer][5][bullet_pointer]=None
         img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
         screen.blit(pygame.transform.rotate(img[ship_pointer][0], angle), (img[ship_pointer][1], img[ship_pointer][2]))
     screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
