@@ -48,8 +48,7 @@ white_surface.fill((255, 255, 255))
 tank_surface = pygame.Surface((120, bottom_bounds)).convert()
 missile_surface = pygame.Surface((120, bottom_bounds)).convert()
 seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
-pause_surface = pygame.Surface((90, 90)).convert()
-pause_border = pygame.Surface((92, 92)).convert()
+pause_surface = pygame.Surface((120, bottom_bounds)).convert()
 
 # fonts and text on the top of the game
 font = pygame.font.SysFont("helvetica", 14)
@@ -68,7 +67,7 @@ y_enemy = -75
 x_enemy = 100
 
 # setting up variables that will be displayed on top
-money = 10000000
+money = 1000
 chances = 3
 pause = False
 ships_destroyed = 0
@@ -100,19 +99,20 @@ while keep_going:
         elif ev.type == MOUSEBUTTONDOWN:  # if the mouse is pressed
             x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
             y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
-            if 131 > x > 9 and 136 > y > 9:  # if the tank part of the menu is pressed
+            y_clicked = 142 > y > 9
+            if 131 > x > 9 and y_clicked:  # if the tank part of the menu is pressed
                 tank_pressed = True
                 missile_pressed = False
                 seamine_pressed = False
-            elif 261 > x > 139 and 136 > y > 9:  # if the missile part of the menu is pressed
+            elif 261 > x > 139 and y_clicked:  # if the missile part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = True
                 seamine_pressed = False
-            elif 391 > x > 269 and 136 > y > 9:  # if the sea mine part of the menu is pressed
+            elif 391 > x > 269 and y_clicked:  # if the sea mine part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = False
                 seamine_pressed = True
-            elif 100 > y > 10 and 400 < x < 490:  # if any other part of the menu is pressed
+            elif y_clicked and 400 < x < 520:  # if any other part of the menu is pressed
                 if pause:  # if the game is already paused
                     pause = False
                 elif not pause:  # if the game is not already paused
@@ -255,9 +255,9 @@ while keep_going:
     screen.blit(missile_surface, (140, top_bounds))
     screen.blit(border, (269, top_bounds-1))
     screen.blit(seamine_surface, (270, top_bounds))
-    screen.blit(main_border, (519, top_bounds-1))
-    screen.blit(display, (520, top_bounds))
-    screen.blit(pause_border, (399, top_bounds - 1))
+    screen.blit(main_border, (534, top_bounds-1))
+    screen.blit(display, (535, top_bounds))
+    screen.blit(border, (399, top_bounds - 1))
     screen.blit(pause_surface, (400, top_bounds))
 
     scale = 150
