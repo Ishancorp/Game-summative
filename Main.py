@@ -67,7 +67,7 @@ y_enemy = -75
 x_enemy = 100
 
 # setting up variables that will be displayed on top
-money = 1000
+money = 10000000
 chances = 3
 pause = False
 ships_destroyed = 0
@@ -93,9 +93,11 @@ clock = pygame.time.Clock()
 keep_going = True
 while keep_going:
     clock.tick(30)
+
     for ev in pygame.event.get():
         if ev.type == QUIT:  # if the game is quit
             keep_going = False
+
         elif ev.type == MOUSEBUTTONDOWN:  # if the mouse is pressed
             x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
             y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
@@ -104,26 +106,31 @@ while keep_going:
                 tank_pressed = True
                 missile_pressed = False
                 seamine_pressed = False
+
             elif 261 > x > 139 and y_clicked:  # if the missile part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = True
                 seamine_pressed = False
+
             elif 391 > x > 269 and y_clicked:  # if the sea mine part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = False
                 seamine_pressed = True
+
             elif y_clicked and 400 < x < 520:  # if any other part of the menu is pressed
                 if pause:  # if the game is already paused
                     pause = False
                 elif not pause:  # if the game is not already paused
                     pause = True
+
             elif (not pause) and y > 150:  # if the main gameplay part is pressed
                 overlap = False
                 for image in img:
                     if (image[1] == x and image[2] == y) or (sprite_type == "M" and (image[1] == x or image[1] == x-35 or image[1] == x-70) and image[2] == y) or (missile_pressed and (image[1] == x or image[1] == x+35 or image[1] == x+70) and image[2] == y):
                         overlap = True
                         print("Overlap")
-                print(str(x), str(y))
+                print(x, y)
+
                 # overlap is true if the x and y of the sprite is already covered
                 if not overlap:
                     item = 0
