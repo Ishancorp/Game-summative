@@ -18,18 +18,22 @@ screen = pygame.display.set_mode((1015, 768))
 
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert()  # the background pic needs to be 1015x595 px.
-ball = pygame.image.load("tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
+ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
 missile = pygame.image.load("missile.png").convert()
-norm_enemy_ship = pygame.image.load("enemy ship.gif").convert()
-bullet = pygame.image.load("projectile.gif").convert()
+mine = pygame.image.load("small_ball.png")
+norm_enemy_ship = pygame.image.load("enemy ship.png").convert()
+bullet = pygame.image.load("projectile.png").convert()
 img = []
 
 # Setting up some colours
 dark_gray = (75, 75, 75)
-pressed = (75, 125, 230)
+pressed = (0, 100, 0)
+green = (0, 200, 0)
 gray = (200, 200, 200)
 light_gray = (242, 242, 242)
 black = (0, 0, 0)
+poor = (100, 0, 0)
+red = (200, 0, 0)
 
 # setting up surfaces for the menu, along with the menu backdrop
 bottom_bounds = 155
@@ -44,6 +48,8 @@ white_surface.fill((255, 255, 255))
 tank_surface = pygame.Surface((120, bottom_bounds)).convert()
 missile_surface = pygame.Surface((120, bottom_bounds)).convert()
 seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
+pause_surface = pygame.Surface((90, 90)).convert()
+pause_border = pygame.Surface((92, 92)).convert()
 
 # fonts and text on the top of the game
 font = pygame.font.SysFont("helvetica", 14)
@@ -53,6 +59,7 @@ missile_text = font.render("Missile Launcher", True, black)
 missile_cost = font.render("$10 000", True, black)
 mine_text = font.render("Sea Mine", True, black)
 mine_cost = font.render("$50 000", True, black)
+paused = font.render("", True, black)
 
 # setting up coordinate variables
 x = 0
@@ -61,7 +68,7 @@ y_enemy = -75
 x_enemy = 100
 
 # setting up variables that will be displayed on top
-money = 0
+money = 10000000
 chances = 3
 pause = False
 ships_destroyed = 0
@@ -70,6 +77,10 @@ tank_pressed = True
 missile_pressed = False
 seamine_pressed = False
 speed_enemy = 0.5
+
+tank_price = 1000
+mine_price = 50000
+missile_price = 10000
 
 # variables relating to bullet
 sprite_type = ""
@@ -90,55 +101,74 @@ while keep_going:
             x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
             y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
             if 131 > x > 9 and 136 > y > 9:  # if the tank part of the menu is pressed
-                print("Tank")
                 tank_pressed = True
                 missile_pressed = False
                 seamine_pressed = False
             elif 261 > x > 139 and 136 > y > 9:  # if the missile part of the menu is pressed
-                print("Missile")
                 tank_pressed = False
                 missile_pressed = True
                 seamine_pressed = False
             elif 391 > x > 269 and 136 > y > 9:  # if the sea mine part of the menu is pressed
-                print("Sea Mine")
                 tank_pressed = False
                 missile_pressed = False
                 seamine_pressed = True
-            elif y < 175:  # if any other part of the menu is pressed
+            elif 100 > y > 10 and 400 < x < 490:  # if any other part of the menu is pressed
                 if pause:  # if the game is already paused
                     pause = False
-                    print("Unpaused")
                 elif not pause:  # if the game is not already paused
                     pause = True
-                    print("Paused")
-            elif (not pause) and ((y < 243 and x > 140) or (383 < y < 453 and x < 840) or (595 >= y > 525 and x > 140) or (y > 595 and x > 840)):  # if the main gameplay part is pressed
+            elif (not pause) and y > 150:  # if the main gameplay part is pressed
                 overlap = False
                 for image in img:
                     if (image[1] == x and image[2] == y) or (sprite_type == "M" and (image[1] == x or image[1] == x-35 or image[1] == x-70) and image[2] == y) or (missile_pressed and (image[1] == x or image[1] == x+35 or image[1] == x+70) and image[2] == y):
                         overlap = True
                         print("Overlap")
+                print(str(x), str(y))
                 # overlap is true if the x and y of the sprite is already covered
                 if not overlap:
                     item = 0
-                    if tank_pressed:
+                    pathway_pressed = (y < 243 and x > 140) or (383 < y < 453 and x < 840) or (595 >= y > 525 and x > 140) or (y > 595 and x > 840)
+                    if tank_pressed and pathway_pressed and (money - tank_price) >= 0:
                         item = ball
                         sprite_type = "T"
-                    elif missile_pressed:
+                        money -= tank_price
+                        img.append([item, x, y, sprite_type, 0, [], 0])
+                    elif missile_pressed and pathway_pressed and money - missile_price >= 0:
                         item = missile
                         sprite_type = "M"
-                    img.append([item, x, y, sprite_type, 0, [], 0])
+                        money -= missile_price
+                        img.append([item, x, y, sprite_type, 0, [], 0])
+                    elif seamine_pressed and money - mine_price >= 0 and not pathway_pressed:
+                        item = mine
+                        sprite_type = "S"
+                        money -= mine_price
+                        img.append([item, x, y, sprite_type, 0, [], 0])
+                    else:
+                        break
 
     # paint selection surfaces to their colours
+    if pause:
+        pause_surface.fill(red)
+        paused = font.render("Resume", True, black)
+    else:
+        pause_surface.fill(green)
+        paused = font.render("Pause", True, black)
     if not tank_pressed:
         tank_surface.fill(gray)
+    elif (tank_price - money) > 0:
+        tank_surface.fill(poor)
     else:
         tank_surface.fill(pressed)
     if not missile_pressed:
         missile_surface.fill(gray)
+    elif (missile_price - money) > 0:
+        missile_surface.fill(poor)
     else:
         missile_surface.fill(pressed)
     if not seamine_pressed:
         seamine_surface.fill(gray)
+    elif (mine_price - money) > 0:
+        seamine_surface.fill(poor)
     else:
         seamine_surface.fill(pressed)
 
@@ -189,12 +219,12 @@ while keep_going:
                 if lower == 0:  # if the divisor is zero, set it to a very large number
                     lower = 10**23
                 angle = math.atan((x_enemy-img[ship_pointer][1]+(norm_enemy_ship.get_size()[1]/100))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
-            else:  #If the ship has not been rotated
+            else:  # If the ship has not been rotated
                 lower = y_enemy-img[ship_pointer][2]-20+(norm_enemy_ship.get_size()[1]/2)  # this code will be the divisor, may be equal to zero at times
                 if lower == 0:  # if the divisor is zero, set it to a very large number
                     lower = 10**23
                 angle = math.atan((x_enemy-img[ship_pointer][1]+(norm_enemy_ship.get_size()[0]/2))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
-
+                angle -= 180
             if img[ship_pointer][2] <= y_enemy:  # if the tank is higher than the ship, invert it
                 angle += 180
             img[ship_pointer][6] += 1  # add one to the ship's timer
@@ -206,8 +236,8 @@ while keep_going:
                 for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
                     if not img[ship_pointer][5][bullet_pointer] == None:  # if the bullet actually exists and has not been deleted
                         if not pause:
-                            img[ship_pointer][5][bullet_pointer][1] -= 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
-                            img[ship_pointer][5][bullet_pointer][2] -= 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                            img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                            img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
                         if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
                             screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
                         else:
@@ -227,9 +257,12 @@ while keep_going:
     screen.blit(seamine_surface, (270, top_bounds))
     screen.blit(main_border, (519, top_bounds-1))
     screen.blit(display, (520, top_bounds))
+    screen.blit(pause_border, (399, top_bounds - 1))
+    screen.blit(pause_surface, (400, top_bounds))
 
     scale = 150
     top_bounds = 100
+    screen.blit(paused, (408, 50))
     screen.blit(islandsdestroyed_text, (400+scale, top_bounds+15))
     screen.blit(chance_text, (650+scale, top_bounds+15))
     screen.blit(shipsdestroyed_text, (400+scale, top_bounds-25))
@@ -246,6 +279,7 @@ while keep_going:
 
     screen.blit(ball, (scale+3, 50))
     screen.blit(missile, (scale+98, 50))
+    screen.blit(mine, (scale + 260, 50))
     pygame.display.flip()
 
 pygame.display.quit()
