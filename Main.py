@@ -22,7 +22,7 @@ ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multip
 missile = pygame.image.load("missile.png").convert()
 mine = pygame.image.load("Army mine.png")
 norm_enemy_ship = pygame.image.load("enemy ship.png").convert()
-bullet = pygame.image.load("projectile.png").convert()
+bullet = pygame.image.load("projectile.gif").convert()
 img = []
 
 # Setting up some colours
@@ -65,6 +65,7 @@ x = 0
 y = 0
 y_enemy = 15
 x_enemy = 100
+
 
 # setting up variables that will be displayed on top
 money = 10000000
@@ -217,19 +218,20 @@ while keep_going:
                 if lower == 0:  # if the divisor is zero, set it to a very large number
                     lower = 10**23
                 angle = math.atan((x_enemy-img[ship_pointer][1]+(norm_enemy_ship.get_size()[1]/100))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
-            else:  # If the ship has not been rotated
+            else:
                 lower = y_enemy-img[ship_pointer][2]-20+(norm_enemy_ship.get_size()[1]/2)  # this code will be the divisor, may be equal to zero at times
                 if lower == 0:  # if the divisor is zero, set it to a very large number
                     lower = 10**23
                 angle = math.atan((x_enemy-img[ship_pointer][1]+(norm_enemy_ship.get_size()[0]/2))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
-                angle -= 180
-            if img[ship_pointer][2] <= y_enemy:  # if the tank is higher than the ship, invert it
+            if img[ship_pointer][2] >= y_enemy:  # if the tank is higher than the ship, invert it
                 angle += 180
             img[ship_pointer][6] += 1  # add one to the ship's timer
             if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
                 img[ship_pointer][6] = 0
-                if not pause:
+                range_bullets = 250
+                if (not pause) and -range_bullets<((x_enemy-img[ship_pointer][1])**2+(y_enemy-img[ship_pointer][2])**2)**0.5<range_bullets:  # Using Pythagorean Theorem to determine if tank within range
                     img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
+            angle+=180
             for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
                 if not img[ship_pointer][5][bullet_pointer] == None:  # if the bullet actually exists and has not been deleted
                     if not pause:
@@ -239,6 +241,7 @@ while keep_going:
                         screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
                     else:
                         img[ship_pointer][5][bullet_pointer]=None
+                    
         img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
         screen.blit(pygame.transform.rotate(img[ship_pointer][0], angle), (img[ship_pointer][1], img[ship_pointer][2]))
     screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
