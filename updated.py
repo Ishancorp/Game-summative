@@ -1,4 +1,3 @@
-
 # Ishan Sharma and Aryan Kukreja
 # For Mr. Cope
 # April 23, 2016
@@ -20,9 +19,9 @@ screen = pygame.display.set_mode((1015, 768))
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game Initial Sketch.png").convert()  # the background pic needs to be 1015x595 px.
 ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile = pygame.image.load("Missile Launcher.png").convert()
-mine = pygame.image.load("Sea Mine.png")
-norm_enemy_ship = pygame.image.load("Army Ship Level 1.gif").convert()
+missile = pygame.image.load("missile.png").convert()
+mine = pygame.image.load("Army mine.png")
+norm_enemy_ship = pygame.image.load("enemy ship.gif").convert()
 bullet = pygame.image.load("projectile.gif").convert()
 img = []
 
@@ -111,14 +110,16 @@ while keep_going:
         if ev.type == QUIT:  # if the game is quit
             keep_going = False
         elif ev.type == MOUSEBUTTONDOWN:  # if the mouse is pressed
+            x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
+            y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
             if splash_screen:
-                if (blue_surface.get_size()[0]/3 - 150 < x < blue_surface.get_size()[0]/3 + 150) and (blue_surface.get_size()[1]/2-150 < y < blue_surface.get_size()[1]/2-50):
+                if (blue_surface.get_size()[0]/3 < x < blue_surface.get_size()[0]/3 + 300) and (blue_surface.get_size()[1]/2-100 < y < blue_surface.get_size()[1]/2):
                     print("play")
-                elif (blue_surface.get_size()[0]/3 - 150 < x < blue_surface.get_size()[0]/3 + 150) and (blue_surface.get_size()[1]/2+150 < y < blue_surface.get_size()[1]/2+50):
+                    splash_screen = False
+                    pause = True
+                elif (blue_surface.get_size()[0]/3 < x < blue_surface.get_size()[0]/3 + 300) and (blue_surface.get_size()[1]/2+100 < y < blue_surface.get_size()[1]/2+200):
                     print("settings")
             else:
-                x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
-                y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
                 y_clicked = 142 > y > 9
                 if 131 > x > 9 and y_clicked:  # if the tank part of the menu is pressed
                     tank_pressed = True
@@ -298,12 +299,13 @@ while keep_going:
     screen.blit(missile, (scale+98, 50))
     screen.blit(mine, (scale + 260, 50))
 
-    screen.blit(blue_surface, (0, 0))
-    screen.blit(play_surface, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2-100))
-    screen.blit(settings_surface, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2+100))
-    screen.blit(title_text, (blue_surface.get_size()[0]/15, blue_surface.get_size()[1]/2-300))
-    screen.blit(play_text, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2-100))
-    screen.blit(settings_text, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2+100))
+    if splash_screen:
+        screen.blit(blue_surface, (0, 0))
+        screen.blit(play_surface, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2-100))
+        screen.blit(settings_surface, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2+100))
+        screen.blit(title_text, (blue_surface.get_size()[0]/15, blue_surface.get_size()[1]/2-300))
+        screen.blit(play_text, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2-100))
+        screen.blit(settings_text, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2+100))
     pygame.display.flip()
 
 pygame.display.quit()
