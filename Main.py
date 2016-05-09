@@ -234,6 +234,7 @@ while keep_going:
             angle+=180
             for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
                 if not img[ship_pointer][5][bullet_pointer] == None:  # if the bullet actually exists and has not been deleted
+                    deleted=False
                     if not pause:
                         img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
                         img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
@@ -241,6 +242,15 @@ while keep_going:
                         screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
                     else:
                         img[ship_pointer][5][bullet_pointer]=None
+                        deleted=True
+                    if not deleted:
+                        y_adj=norm_enemy_ship.get_size()[1]
+                        x_adj=norm_enemy_ship.get_size()[0]
+                        if rotate:
+                            x_adj=norm_enemy_ship.get_size()[1]
+                            y_adj=norm_enemy_ship.get_size()[0]
+                        if img[ship_pointer][5][bullet_pointer][1]<x_enemy<(img[ship_pointer][5][bullet_pointer][1]+x_adj) and img[ship_pointer][5][bullet_pointer][2]<y_enemy<(img[ship_pointer][5][bullet_pointer][2]+y_adj):
+                            img[ship_pointer][5][bullet_pointer]=None
                     
         img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
         screen.blit(pygame.transform.rotate(img[ship_pointer][0], angle), (img[ship_pointer][1], img[ship_pointer][2]))
