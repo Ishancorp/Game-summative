@@ -19,10 +19,11 @@ screen = pygame.display.set_mode((1015, 768))
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game Initial Sketch.png").convert()  # the background pic needs to be 1015x595 px.
 ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile = pygame.image.load("missile.png").convert()
-mine = pygame.image.load("Army mine.png")
-norm_enemy_ship = pygame.image.load("enemy ship.gif").convert()
+missile = pygame.image.load("Missle Launcher.png").convert()
+mine = pygame.image.load("Sea Mine.png")
+norm_enemy_ship = pygame.image.load("Army Ship Level 1.gif").convert()
 bullet = pygame.image.load("projectile.gif").convert()
+rocket = pygame.image.load("Army Rocket.gif").convert()
 img = []
 
 # Setting up some colours
@@ -38,9 +39,9 @@ blue = (162, 196, 201)
 
 # setting up surfaces for the menu, along with the menu backdrop
 bottom_bounds = 155
-border = pygame.Surface((122, bottom_bounds+2)).convert()
+border = pygame.Surface((122, bottom_bounds + 2)).convert()
 border.fill(dark_gray)
-main_border = pygame.Surface((477, bottom_bounds+2)).convert()
+main_border = pygame.Surface((477, bottom_bounds + 2)).convert()
 main_border.fill(dark_gray)
 display = pygame.Surface((475, bottom_bounds)).convert()
 display.fill(gray)
@@ -110,14 +111,14 @@ while keep_going:
         if ev.type == QUIT:  # if the game is quit
             keep_going = False
         elif ev.type == MOUSEBUTTONDOWN:  # if the mouse is pressed
-            x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
-            y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
+            x = ((ev.pos[0]) // 35) * 35  # getting the x of where the mouse clicked
+            y = ((ev.pos[1]) // 35) * 35  # getting the y of where the mouse clicked
             if splash_screen:
-                if (blue_surface.get_size()[0]/3 < x < blue_surface.get_size()[0]/3 + 300) and (blue_surface.get_size()[1]/2-100 < y < blue_surface.get_size()[1]/2):
+                if (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 - 100 < y < blue_surface.get_size()[1] / 2):
                     print("play")
                     splash_screen = False
                     pause = True
-                elif (blue_surface.get_size()[0]/3 < x < blue_surface.get_size()[0]/3 + 300) and (blue_surface.get_size()[1]/2+100 < y < blue_surface.get_size()[1]/2+200):
+                elif (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 + 100 < y < blue_surface.get_size()[1] / 2 + 200):
                     print("settings")
             else:
                 y_clicked = 142 > y > 9
@@ -152,12 +153,12 @@ while keep_going:
                             item = ball
                             sprite_type = "T"
                             money -= tank_price
-                            img.append([item, x, y, sprite_type, 0, [], 0])
+                            img.append([item, x, y - 2.5, sprite_type, 0, [], 0])
                         elif missile_pressed and pathway_pressed and money - missile_price >= 0:
                             item = missile
                             sprite_type = "M"
                             money -= missile_price
-                            img.append([item, x, y, sprite_type, 0, [], 0])
+                            img.append([item, x, y - 2.5, sprite_type, 0, [], 0])
                         elif seamine_pressed and money - mine_price >= 0 and not pathway_pressed:
                             item = mine
                             sprite_type = "S"
@@ -192,18 +193,18 @@ while keep_going:
         seamine_surface.fill(pressed)
 
     # render text with new values for every variable
-    money_text = font.render("Money: $"+str(money), True, black)
-    numweapons_text = font.render("Weapons: "+str(len(img)), True, black)
-    islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
-    chance_text = font.render("Chances: "+str(chances), True, black)
-    shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
-    shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
+    money_text = font.render("Money: $" + str(money), True, black)
+    numweapons_text = font.render("Weapons: " + str(len(img)), True, black)
+    islandsdestroyed_text = font.render("Islands Destroyed: " + str(3 - chances), True, black)
+    chance_text = font.render("Chances: " + str(chances), True, black)
+    shipsdestroyed_text = font.render("Ships Destroyed: " + str(ships_destroyed), True, black)
+    shipsremaining_text = font.render("Ships Remaining: " + str(ships_remaining), True, black)
 
     # code for enemy ships route
     if not pause:
         if y_enemy < 100 or (x_enemy >= (screen.get_size()[0]-200) and y_enemy < 350):
             y_enemy += speed_enemy
-            if x_enemy == (screen.get_size()[0]-200):
+            if x_enemy == (screen.get_size()[0] - 200):
                 norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, -90)
                 rotate = False
                 x_enemy += 10
@@ -234,34 +235,67 @@ while keep_going:
         angle = 0
         if img[ship_pointer][3] == "T":  # if the item is a tank
             if not rotate:  # If the enemy ship has not been rotated
-                lower = y_enemy-img[ship_pointer][2]-20+(norm_enemy_ship.get_size()[0]/0.75)  # this code will be the divisor, may be equal to zero at times
+                lower = y_enemy-img[ship_pointer][2] - 20 + (norm_enemy_ship.get_size()[0] / 0.75)  # this code will be the divisor, may be equal to zero at times
                 if lower == 0:  # if the divisor is zero, set it to a very large number
                     lower = 10**23
-                angle = math.atan((x_enemy-img[ship_pointer][1]+(norm_enemy_ship.get_size()[1]/100))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
+                angle = math.atan((x_enemy - img[ship_pointer][1] + (norm_enemy_ship.get_size()[1] / 100)) / lower) * 180 / 3.14  # finding the angle the tank needs to be pointed to
+                angle -= 180
             else:  # If the ship has not been rotated
-                lower = y_enemy-img[ship_pointer][2]-20+(norm_enemy_ship.get_size()[1]/2)  # this code will be the divisor, may be equal to zero at times
+                lower = y_enemy - img[ship_pointer][2] - 20 + (norm_enemy_ship.get_size()[1] / 2)  # this code will be the divisor, may be equal to zero at times
                 if lower == 0:  # if the divisor is zero, set it to a very large number
                     lower = 10**23
-                angle = math.atan((x_enemy-img[ship_pointer][1]+(norm_enemy_ship.get_size()[0]/2))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
+                angle = math.atan((x_enemy - img[ship_pointer][1] + (norm_enemy_ship.get_size()[0] / 2)) / lower) * 180 / 3.14  # finding the angle the tank needs to be pointed to
                 angle -= 180
             if img[ship_pointer][2] <= y_enemy:  # if the tank is higher than the ship, invert it
                 angle += 180
             img[ship_pointer][6] += 1  # add one to the ship's timer
-            if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
+            if img[ship_pointer][6] == 5:  # if ship timer is 5, reset it, and if the game is not paused, spawn bullet
                 img[ship_pointer][6] = 0
                 if not pause:
-                    img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
+                    img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0] / 2), img[ship_pointer][2] + (ball.get_size()[1] / 2), math.sin(angle*3.14 / 180), math.cos(angle * 3.14 / 180)])
             for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
-                if not img[ship_pointer][5][bullet_pointer] is None:  # if the bullet actually exists and has not been deleted
+                if not (img[ship_pointer][5][bullet_pointer] is None):  # if the bullet exists and has not been deleted
                     if not pause:
-                        img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
-                        img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                        img[ship_pointer][5][bullet_pointer][1] += 6 * img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                        img[ship_pointer][5][bullet_pointer][2] += 6 * img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
                     if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
                         screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
                     else:
-                        img[ship_pointer][5][bullet_pointer]=None
+                        img[ship_pointer][5][bullet_pointer] = None
+        elif img[ship_pointer][3] == "M":  # if the item is a tank
+            if not rotate:  # If the enemy ship has not been rotated
+                lower = y_enemy - img[ship_pointer][2] - 20 + (norm_enemy_ship.get_size ()[0] / 0.75)  # this code will be the divisor, may be equal to zero at times
+                if lower == 0:  # if the divisor is zero, set it to a very large number
+                    lower = 10 ** 23
+                angle = math.atan ((x_enemy - img[ship_pointer][1] + (norm_enemy_ship.get_size ()[1] / 100)) / lower) * 180 / 3.14  # finding the angle the tank needs to be pointed to
+            else:  # If the ship has been rotated
+                lower = y_enemy - img[ship_pointer][2] - 20 + (norm_enemy_ship.get_size ()[1] / 2)  # this code will be the divisor, may be equal to zero at times
+                if lower == 0:  # if the divisor is zero, set it to a very large number
+                    lower = 10 ** 23
+                angle = math.atan((x_enemy - img[ship_pointer][1] + (norm_enemy_ship.get_size ()[0] / 2)) / lower) * 180 / 3.14  # finding the angle the tank needs to be pointed to
+            if img[ship_pointer][2] <= y_enemy:  # if the tank is higher than the ship, invert it
+                img[ship_pointer][6] += 1  # add one to the ship's timer
+            if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
+                img[ship_pointer][6] = 0
+                if not pause:
+                    img[ship_pointer][5].append ([rocket, img[ship_pointer][1] + (ball.get_size ()[0] / 2) - 15, img[ship_pointer][2] + (ball.get_size ()[1] / 2), math.sin (angle * 3.14 / 180), math.cos (angle * 3.14 / 180)])
+                    img[ship_pointer][5].append ([rocket, img[ship_pointer][1] + (ball.get_size ()[0] / 2) + 10, img[ship_pointer][2] + (ball.get_size ()[1] / 2), math.sin ((angle) * 3.14 / 180), math.cos ((angle) * 3.14 / 180)])
+                    img[ship_pointer][5].append ([rocket, img[ship_pointer][1] + (ball.get_size ()[0] / 2) + 40, img[ship_pointer][2] + (ball.get_size ()[1] / 2), math.sin ((angle) * 3.14 / 180), math.cos ((angle ) * 3.14 / 180)])
+                    img[ship_pointer][5].append ([rocket, img[ship_pointer][1] + (ball.get_size ()[0] / 2) + 67, img[ship_pointer][2] + (ball.get_size ()[1] / 2), math.sin ((angle) * 3.14 / 180), math.cos ((angle ) * 3.14 / 180)])
+            for bullet_pointer in range (0, len (img[ship_pointer][5])):  # looping through bullets
+                if not (img[ship_pointer][5][bullet_pointer] is None):  # if the bullet actually exists and has not been deleted
+                    if not pause:
+                        img[ship_pointer][5][bullet_pointer][1] += 12 * img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                        img[ship_pointer][5][bullet_pointer][2] += 12 * img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                    if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
+                        screen.blit(img[ship_pointer][5][bullet_pointer][0],(img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
+                    else:
+                        img[ship_pointer][5][bullet_pointer] = None
         img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
-        screen.blit(pygame.transform.rotate(img[ship_pointer][0], angle), (img[ship_pointer][1], img[ship_pointer][2]))
+        if img[ship_pointer][3] == "T":
+            screen.blit(pygame.transform.rotate(img[ship_pointer][0], angle), (img[ship_pointer][1], img[ship_pointer][2]))
+        elif img[ship_pointer][3] == "M":
+            screen.blit(img[ship_pointer][0], (img[ship_pointer][1], img[ship_pointer][2]))
     screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
 
     # blitting the top part of the screen
