@@ -76,9 +76,10 @@ paused = font.render("", True, black)
 play_text = splash_font.render("Play".center(11), True, black)
 settings_text = splash_font.render("Settings".center(11), True, black)
 title_text = title_font.render("WORLD WAR SEA", True, black)
-music_title = splash_font.render("Music Settings: ")
+music_title = splash_font.render("Music Settings: ", True, black)
 yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
+escape_settings = font.render("Click 'q' on the keyboard to go back to the home page", True, black)
 
 # setting up coordinate variables
 x = 0
@@ -101,9 +102,12 @@ tank_price = 1000
 mine_price = 50000
 missile_price = 10000
 
+keys = pygame.key.get_pressed()
+
 # variables relating to bullet
 sprite_type = ""
 angle = 0
+music = True
 
 # whether or not the enemy ship has been rotated
 rotate = False
@@ -130,6 +134,14 @@ while keep_going:
                     settings_screen = True
                     splash_screen = False
                     print("settings")
+            if settings_screen:
+                if (100 < x < 1015) and (0 < y < 400):
+                    music = True
+                elif (100 < x < 1015) and (400 < y < 768):
+                    music = False
+                elif x < 100:
+                    splash_screen = True
+                    pause = True
             else:
                 y_clicked = 142 > y > 9
                 if 131 > x > 9 and y_clicked:  # if the tank part of the menu is pressed
@@ -176,10 +188,17 @@ while keep_going:
                             img.append([item, x, y, sprite_type, 0, [], 0])
                         else:
                             break
+
     # paint selection surfaces to their colours
+    if music:
+        yes_music_surface.fill(green)
+        no_music_surface.fill(light_gray)
+    elif not music:
+        yes_music_surface.fill(light_gray)
+        no_music_surface.fill(green)
     if pause:
         pause_surface.fill(red)
-        paused = font.render("Resume", True, black)
+        paused = font.render("Play", True, black)
     else:
         pause_surface.fill(green)
         paused = font.render("Pause", True, black)
@@ -353,8 +372,11 @@ while keep_going:
     if settings_screen:
         screen.blit(blue_surface, (0, 0))
         screen.blit(music_title, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2 - 200))
-        screen.blit(yes_music, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2))
-        screen.blit(no_music, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2))
+        screen.blit(yes_music, (235, 400))
+        screen.blit(no_music, (235, 500))
+        screen.blit(escape_settings, (235, 700))
+        screen.blit(yes_music_surface, (180, 383))
+        screen.blit(no_music_surface, (180, 483))
     pygame.display.flip()
 
 pygame.display.quit()
