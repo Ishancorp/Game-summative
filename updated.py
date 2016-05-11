@@ -19,7 +19,7 @@ screen = pygame.display.set_mode((1015, 768))
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game Initial Sketch.png").convert()  # the background pic needs to be 1015x595 px.
 ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile = pygame.image.load("Missle Launcher.png").convert()
+missile = pygame.image.load("Missile Launcher.gif").convert()
 mine = pygame.image.load("Sea Mine.png")
 norm_enemy_ship = pygame.image.load("Army Ship Level 1.gif").convert()
 bullet = pygame.image.load("projectile.gif").convert()
@@ -57,6 +57,10 @@ play_surface = pygame.Surface((300, 100)).convert()
 play_surface.fill(light_gray)
 settings_surface = pygame.Surface((300, 100)).convert()
 settings_surface.fill(light_gray)
+yes_music_surface = pygame.Surface((50, 50)).convert()
+yes_music_surface.fill(green)
+no_music_surface = pygame.Surface((50, 50)).convert()
+no_music_surface.fill(light_gray)
 
 # fonts and text on the top of the game
 font = pygame.font.SysFont("helvetica", 14)
@@ -72,6 +76,9 @@ paused = font.render("", True, black)
 play_text = splash_font.render("Play".center(11), True, black)
 settings_text = splash_font.render("Settings".center(11), True, black)
 title_text = title_font.render("WORLD WAR SEA", True, black)
+music_title = splash_font.render("Music Settings: ")
+yes_music = font.render("Turn Music on", True, black)
+no_music = font.render("Turn Music off", True, black)
 
 # setting up coordinate variables
 x = 0
@@ -101,6 +108,7 @@ angle = 0
 # whether or not the enemy ship has been rotated
 rotate = False
 splash_screen = True
+settings_screen = False
 
 # Game engine
 clock = pygame.time.Clock()
@@ -117,8 +125,10 @@ while keep_going:
                 if (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 - 100 < y < blue_surface.get_size()[1] / 2):
                     print("play")
                     splash_screen = False
-                    pause = True
+                    pause = False
                 elif (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 + 100 < y < blue_surface.get_size()[1] / 2 + 200):
+                    settings_screen = True
+                    splash_screen = False
                     print("settings")
             else:
                 y_clicked = 142 > y > 9
@@ -340,6 +350,11 @@ while keep_going:
         screen.blit(title_text, (blue_surface.get_size()[0]/15, blue_surface.get_size()[1]/2-300))
         screen.blit(play_text, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2-100))
         screen.blit(settings_text, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2+100))
+    if settings_screen:
+        screen.blit(blue_surface, (0, 0))
+        screen.blit(music_title, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2 - 200))
+        screen.blit(yes_music, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2))
+        screen.blit(no_music, (blue_surface.get_size()[0]/3, blue_surface.get_size()[1]/2))
     pygame.display.flip()
 
 pygame.display.quit()
