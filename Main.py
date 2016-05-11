@@ -21,8 +21,8 @@ back = pygame.image.load("Game initial sketch.png").convert()  # the background 
 ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
 missile = pygame.image.load("missile.png").convert()
 mine = pygame.image.load("Army mine.png")
-norm_enemy_ship = pygame.image.load("enemy ship.png").convert()
-bullet = pygame.image.load("projectile.png").convert()
+norm_enemy_ship = pygame.image.load("enemy ship.gif").convert()
+bullet = pygame.image.load("projectile.gif").convert()
 img = []
 
 # Setting up some colours
@@ -51,7 +51,7 @@ seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
 pause_surface = pygame.Surface((120, bottom_bounds)).convert()
 
 # fonts and text on the top of the game
-font = pygame.font.SysFont("helvetica", 14)
+font = pygame.font.SysFont("arial", 14)
 tank_text = font.render("Tank", True, black)
 tank_cost = font.render("$1 000", True, black)
 missile_text = font.render("Missile Launcher", True, black)
@@ -82,7 +82,7 @@ tank_price = 1000
 mine_price = 50000
 missile_price = 10000
 
-# variables relating to bullet
+# variables relating to tank
 sprite_type = ""
 angle = 0
 
@@ -97,7 +97,7 @@ keep_going = True
 while keep_going:
     clock.tick(30)
     for ev in pygame.event.get():
-        if ev.type == QUIT:  # if the game is quit
+        if ev.type == QUIT:  # if the game is quitted
             keep_going = False
         elif ev.type == MOUSEBUTTONDOWN:  # if the mouse is pressed
             x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
@@ -181,11 +181,12 @@ while keep_going:
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
     shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
 
-    # code for enemy ships route
+    # code for enemy ships' route
     if not pause:
         if y_enemy < 100 or (x_enemy >= (screen.get_size()[0]-200) and y_enemy < 350):
             y_enemy += speed_enemy
             if x_enemy == (screen.get_size()[0]-200):
+                norm_enemy_ship = None
                 norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, -90)
                 rotate = False
                 x_enemy += 10
@@ -212,6 +213,7 @@ while keep_going:
 
     # Blitting
     screen.blit(back, (0, 173))
+    screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
     for ship_pointer in range(0, len(img)):  # looping through player stuff
         angle = 0
         if img[ship_pointer][3] == "T":  # if the item is a tank
@@ -239,24 +241,22 @@ while keep_going:
                     if not pause:
                         img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
                         img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                        
                     y_adj = norm_enemy_ship.get_size()[1]
                     x_adj = norm_enemy_ship.get_size()[0]
-                    if rotate:
-                        x_adj = norm_enemy_ship.get_size()[1]
-                        y_adj = norm_enemy_ship.get_size()[0]
-                    collision = img[ship_pointer][5][bullet_pointer][1] < x_enemy < (img[ship_pointer][5][bullet_pointer][1]+x_adj) and img[ship_pointer][5][bullet_pointer][2] < y_enemy < (img[ship_pointer][5][bullet_pointer][2]+y_adj)
+                    
+                    collision = (0 <= (x_enemy-img[ship_pointer][5][bullet_pointer][1]) <= x_adj) or (0 <=(y_enemy-img[ship_pointer][5][bullet_pointer][2]) <= y_adj)
                     within_screen = 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768
-                    if collision or not within_screen:
+                    if collision: #or not within_screen:
                         img[ship_pointer][5][bullet_pointer] = None
+                        print("collision")
 
         img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
         screen.blit(pygame.transform.rotate(img[ship_pointer][0], img[ship_pointer][4]), (img[ship_pointer][1], img[ship_pointer][2]))
         for bullet_pointer in range(0, len(img[ship_pointer][5])):
             if type(img[ship_pointer][5][bullet_pointer]) == list:
-                within_screen = 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768
-                if within_screen and img[ship_pointer][5][bullet_pointer] != None:  # only blit it if it is on the screen, otherwise delete it
+                if img[ship_pointer][5][bullet_pointer] != None:  # only blit it if it is on the screen, otherwise delete it
                     screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
-    screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
 
     # blitting the top part of the screen
     top_bounds = 10
