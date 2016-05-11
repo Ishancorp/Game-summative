@@ -22,7 +22,7 @@ ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multip
 missile = pygame.image.load("missile.png").convert()
 mine = pygame.image.load("Army mine.png")
 norm_enemy_ship = pygame.image.load("enemy ship.png").convert()
-bullet = pygame.image.load("projectile.gif").convert()
+bullet = pygame.image.load("projectile.png").convert()
 img = []
 
 # Setting up some colours
@@ -88,6 +88,8 @@ angle = 0
 
 # whether or not the enemy ship has been rotated
 rotate = False
+
+tester=0
 
 # Game engine
 clock = pygame.time.Clock()
@@ -229,31 +231,31 @@ while keep_going:
             if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
                 img[ship_pointer][6] = 0
                 range_bullets = 250
-                if (not pause) and -range_bullets<((x_enemy-img[ship_pointer][1])**2+(y_enemy-img[ship_pointer][2])**2)**0.5<range_bullets:  # Using Pythagorean Theorem to determine if tank within range
+                if (not pause) and -range_bullets < ((x_enemy-img[ship_pointer][1])**2+(y_enemy-img[ship_pointer][2])**2) ** 0.5 < range_bullets:  # Using Pythagorean Theorem to determine if tank within range
                     img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
-            angle+=180
+            angle += 180
             for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
-                if not img[ship_pointer][5][bullet_pointer] == None:  # if the bullet actually exists and has not been deleted
-                    deleted=False
+                if type(img[ship_pointer][5][bullet_pointer]) == list:  # if the bullet actually exists and has not been deleted
                     if not pause:
                         img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
                         img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
-                    if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
-                        screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
-                    else:
-                        img[ship_pointer][5][bullet_pointer]=None
-                        deleted=True
-                    if not deleted:
-                        y_adj=norm_enemy_ship.get_size()[1]
-                        x_adj=norm_enemy_ship.get_size()[0]
-                        if rotate:
-                            x_adj=norm_enemy_ship.get_size()[1]
-                            y_adj=norm_enemy_ship.get_size()[0]
-                        if img[ship_pointer][5][bullet_pointer][1]<x_enemy<(img[ship_pointer][5][bullet_pointer][1]+x_adj) and img[ship_pointer][5][bullet_pointer][2]<y_enemy<(img[ship_pointer][5][bullet_pointer][2]+y_adj):
-                            img[ship_pointer][5][bullet_pointer]=None
-                    
+                    y_adj = norm_enemy_ship.get_size()[1]
+                    x_adj = norm_enemy_ship.get_size()[0]
+                    if rotate:
+                        x_adj = norm_enemy_ship.get_size()[1]
+                        y_adj = norm_enemy_ship.get_size()[0]
+                    collision = img[ship_pointer][5][bullet_pointer][1] < x_enemy < (img[ship_pointer][5][bullet_pointer][1]+x_adj) and img[ship_pointer][5][bullet_pointer][2] < y_enemy < (img[ship_pointer][5][bullet_pointer][2]+y_adj)
+                    within_screen = 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768
+                    if collision or not within_screen:
+                        img[ship_pointer][5][bullet_pointer] = None
+
         img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
-        screen.blit(pygame.transform.rotate(img[ship_pointer][0], angle), (img[ship_pointer][1], img[ship_pointer][2]))
+        screen.blit(pygame.transform.rotate(img[ship_pointer][0], img[ship_pointer][4]), (img[ship_pointer][1], img[ship_pointer][2]))
+        for bullet_pointer in range(0, len(img[ship_pointer][5])):
+            if type(img[ship_pointer][5][bullet_pointer]) == list:
+                within_screen = 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768
+                if within_screen and img[ship_pointer][5][bullet_pointer] != None:  # only blit it if it is on the screen, otherwise delete it
+                    screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
     screen.blit(norm_enemy_ship, (x_enemy, y_enemy))  # blitting the enemy
 
     # blitting the top part of the screen
