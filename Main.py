@@ -21,8 +21,8 @@ back = pygame.image.load("Game initial sketch.png").convert()  # the background 
 ball = pygame.image.load("Tank.gif").convert()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
 missile = pygame.image.load("missile.png").convert()
 mine = pygame.image.load("Army mine.png")
-norm_enemy_ship = pygame.image.load("enemy ship.png").convert()
-bullet = pygame.image.load("projectile.png").convert()
+norm_enemy_ship = pygame.image.load("enemy ship.gif").convert()
+bullet = pygame.image.load("projectile.gif").convert()
 img = []
 
 # Setting up some colours
@@ -181,79 +181,83 @@ while keep_going:
     chance_text = font.render("Chances: "+str(chances), True, black)
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
     shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
-    if norm_enemy_list[0][3] <= 0:
-        norm_enemy_list[0][3] = 5000
-        if rotate:
-            norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, -90)
-        norm_enemy_list[0][1] = 15
-        norm_enemy_list[0][2] = 100
-        ships_destroyed += 1
-
-    # code for enemy ships' route
-    if not pause:
-        if norm_enemy_list[0][2] < 125 or (norm_enemy_list[0][1] >= (screen.get_size()[0]-200) and norm_enemy_list[0][2] < 350):
-            norm_enemy_list[0][2] += speed_enemy
-            if norm_enemy_list[0][1] == (screen.get_size()[0]-200):
-                norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, -90)
-                rotate = False
-                norm_enemy_list[0][1] += 10
-                norm_enemy_list[0][2] += 10
-        elif norm_enemy_list[0][2] == 125 or (norm_enemy_list[0][2] == 350 and norm_enemy_list[0][1] == (screen.get_size()[0]-190)):
-            norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, 90)
-            rotate = True
-            norm_enemy_list[0][1] += speed_enemy
-            norm_enemy_list[0][2] += 150
-        elif norm_enemy_list[0][2] == 350:
-            norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, -90)
-            rotate = False
-            norm_enemy_list[0][1] -= speed_enemy
-        elif norm_enemy_list[0][2] > 350 and norm_enemy_list[0][1] > 125:
-            norm_enemy_list[0][1] -= speed_enemy
-        elif norm_enemy_list[0][1] == 125 and norm_enemy_list[0][2] > 350:
-            norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, 90)
-            rotate = True
-            norm_enemy_list[0][1] -= 0.01
-        elif norm_enemy_list[0][1] < 125 and norm_enemy_list[0][2] > 350:
-            norm_enemy_list[0][2] += speed_enemy
-        else:
-            norm_enemy_list[0][1] += speed_enemy
-
+    
     # Blitting
     screen.blit(back, (0, 173))
-    screen.blit(norm_enemy_ship, (norm_enemy_list[0][1], norm_enemy_list[0][2]))  # blitting the enemy
-    for ship_pointer in range(0, len(img)):  # looping through player stuff
-        angle = 0
-        if img[ship_pointer][3] == "T":  # if the item is a tank
-            lower = norm_enemy_list[0][2]-img[ship_pointer][2]-20+(norm_enemy_ship.get_size()[1]/2)  # this code will be the divisor, may be equal to zero at times
-            if lower == 0:  # if the divisor is zero, set it to a very large number
-                lower = -10**23
-            angle += math.atan((norm_enemy_list[0][1]-img[ship_pointer][1]+(norm_enemy_ship.get_size()[0]/2))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
-            if img[ship_pointer][2] >= norm_enemy_list[0][2]:  # if the tank is higher than the ship, invert it
+    for enemy_pointer in range(0, len(norm_enemy_list)):
+        if norm_enemy_list[enemy_pointer][3] <= 0:
+            norm_enemy_list[enemy_pointer][3] = enemy_health
+            if rotate:
+                norm_enemy_list[enemy_pointer][0] = pygame.transform.rotate(norm_enemy_list[enemy_pointer][0], -90)
+            norm_enemy_list[enemy_pointer][1] = 15
+            norm_enemy_list[enemy_pointer][2] = 100
+            ships_destroyed += 1
+
+        # code for enemy ships' route
+        if not pause:
+            if norm_enemy_list[enemy_pointer][2] < 125 or (norm_enemy_list[enemy_pointer][1] >= (screen.get_size()[0]-200) and norm_enemy_list[enemy_pointer][2] < 350):
+                norm_enemy_list[enemy_pointer][2] += speed_enemy
+                if norm_enemy_list[enemy_pointer][1] == (screen.get_size()[0]-200):
+                    norm_enemy_list[enemy_pointer][0] = pygame.transform.rotate(norm_enemy_list[enemy_pointer][0], -90)
+                    rotate = False
+                    norm_enemy_list[enemy_pointer][1] += 10
+                    norm_enemy_list[enemy_pointer][2] += 10
+            elif norm_enemy_list[enemy_pointer][2] == 125 or (norm_enemy_list[enemy_pointer][2] == 350 and norm_enemy_list[enemy_pointer][1] == (screen.get_size()[0]-190)):
+                norm_enemy_list[enemy_pointer][0] = pygame.transform.rotate(norm_enemy_list[enemy_pointer][0], 90)
+                rotate = True
+                norm_enemy_list[enemy_pointer][1] += speed_enemy
+                norm_enemy_list[enemy_pointer][2] += 150
+            elif norm_enemy_list[enemy_pointer][2] == 350:
+                norm_enemy_list[enemy_pointer][0] = pygame.transform.rotate(norm_enemy_list[enemy_pointer][0], -90)
+                rotate = False
+                norm_enemy_list[enemy_pointer][1] -= speed_enemy
+            elif norm_enemy_list[enemy_pointer][2] > 350 and norm_enemy_list[enemy_pointer][1] > 125:
+                norm_enemy_list[enemy_pointer][1] -= speed_enemy
+            elif norm_enemy_list[enemy_pointer][1] == 125 and norm_enemy_list[enemy_pointer][2] > 350:
+                norm_enemy_list[enemy_pointer][0] = pygame.transform.rotate(norm_enemy_list[enemy_pointer][0], 90)
+                rotate = True
+                norm_enemy_list[enemy_pointer][1] -= 0.01
+            elif norm_enemy_list[enemy_pointer][1] < 125 and norm_enemy_list[enemy_pointer][2] > 350:
+                norm_enemy_list[enemy_pointer][2] += speed_enemy
+            else:
+                norm_enemy_list[enemy_pointer][1] += speed_enemy
+    
+        screen.blit(norm_enemy_list[enemy_pointer][0], (norm_enemy_list[enemy_pointer][1], norm_enemy_list[enemy_pointer][2]))  # blitting the enemy
+        for ship_pointer in range(0, len(img)):  # looping through player stuff
+            angle = 0
+            bullet_range=False
+            if img[ship_pointer][3] == "T":  # if the item is a tank
+                lower = norm_enemy_list[enemy_pointer][2]-img[ship_pointer][2]-20+(norm_enemy_list[enemy_pointer][0].get_size()[1]/2)  # this code will be the divisor, may be equal to zero at times
+                if lower == 0:  # if the divisor is zero, set it to a very large number
+                    lower = -10**23
+                angle += math.atan((norm_enemy_list[enemy_pointer][1]-img[ship_pointer][1]+(norm_enemy_list[enemy_pointer][0].get_size()[0]/2))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
+                if img[ship_pointer][2] >= norm_enemy_list[enemy_pointer][2]:  # if the tank is higher than the ship, invert it
+                    angle += 180
+                img[ship_pointer][6] += 1  # add one to the ship's timer
+                if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
+                    img[ship_pointer][6] = 0
+                    range_bullets = 250
+                    if (not pause) and -range_bullets < ((norm_enemy_list[enemy_pointer][1]-img[ship_pointer][1])**2+(norm_enemy_list[enemy_pointer][2]-img[ship_pointer][2])**2) ** 0.5 < range_bullets:  # Using Pythagorean Theorem to determine if tank within range
+                        img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
+                        bullet_range=True
                 angle += 180
-            img[ship_pointer][6] += 1  # add one to the ship's timer
-            if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
-                img[ship_pointer][6] = 0
-                range_bullets = 250
-                if (not pause) and -range_bullets < ((norm_enemy_list[0][1]-img[ship_pointer][1])**2+(norm_enemy_list[0][2]-img[ship_pointer][2])**2) ** 0.5 < range_bullets:  # Using Pythagorean Theorem to determine if tank within range
-                    img[ship_pointer][5].append([bullet, img[ship_pointer][1]+(ball.get_size()[0]/2), img[ship_pointer][2]+(ball.get_size()[1]/2), math.sin(angle*3.14/180), math.cos(angle*3.14/180)])
-            angle += 180
-            for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
-                if type(img[ship_pointer][5][bullet_pointer]) == list:  # if the bullet actually exists and has not been deleted
-                    if not pause:
-                        img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
-                        img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
+                    if type(img[ship_pointer][5][bullet_pointer]) == list:  # if the bullet actually exists and has not been deleted
+                        if not pause:
+                            img[ship_pointer][5][bullet_pointer][1] += 6*img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                            img[ship_pointer][5][bullet_pointer][2] += 6*img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                        
+                        collision = (0 <= (norm_enemy_list[enemy_pointer][1]-img[ship_pointer][5][bullet_pointer][1]+(norm_enemy_list[enemy_pointer][0].get_size()[1])) <= norm_enemy_list[enemy_pointer][0].get_size()[0]) or (0 <= (norm_enemy_list[enemy_pointer][2]-img[ship_pointer][5][bullet_pointer][2]+(norm_enemy_list[enemy_pointer][0].get_size()[1])) <= norm_enemy_list[enemy_pointer][0].get_size()[1])
+                        within_screen = 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768
+                        if collision or not within_screen:
+                            img[ship_pointer][5][bullet_pointer] = None
+                            if collision:
+                                norm_enemy_list[enemy_pointer][3] -= 1
+                        else:
+                            screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
 
-                    collision = (0 <= (norm_enemy_list[0][1]-img[ship_pointer][5][bullet_pointer][1]+(norm_enemy_ship.get_size()[1])) <= norm_enemy_ship.get_size()[0]) or (0 <= (norm_enemy_list[0][2]-img[ship_pointer][5][bullet_pointer][2]+(norm_enemy_ship.get_size()[1])) <= norm_enemy_ship.get_size()[1])
-                    within_screen = 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768
-                    if collision or not within_screen:
-                        img[ship_pointer][5][bullet_pointer] = None
-                        if collision:
-                            norm_enemy_list[0][3] -= 1
-                    else:
-                        screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
-
-        img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
-        screen.blit(pygame.transform.rotate(img[ship_pointer][0], img[ship_pointer][4]), (img[ship_pointer][1], img[ship_pointer][2]))
+            img[ship_pointer][4] = angle  # add the variable "angle" to the image, before blitting the ship
+            screen.blit(pygame.transform.rotate(img[ship_pointer][0], img[ship_pointer][4]), (img[ship_pointer][1], img[ship_pointer][2]))
 
     # blitting the top part of the screen
     top_bounds = 10
