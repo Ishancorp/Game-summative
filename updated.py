@@ -36,14 +36,15 @@ black = (0, 0, 0)
 poor = (100, 0, 0)
 red = (200, 0, 0)
 blue = (162, 196, 201)
+dark_blue = (100, 100, 200)
 
 # setting up surfaces for the menu, along with the menu backdrop
 bottom_bounds = 155
 border = pygame.Surface((122, bottom_bounds + 2)).convert()
 border.fill(dark_gray)
-main_border = pygame.Surface((477, bottom_bounds + 2)).convert()
+main_border = pygame.Surface((307, bottom_bounds + 2)).convert()
 main_border.fill(dark_gray)
-display = pygame.Surface((475, bottom_bounds)).convert()
+display = pygame.Surface((305, bottom_bounds)).convert()
 display.fill(gray)
 white_surface = pygame.Surface((1015, 173)).convert()
 white_surface.fill((255, 255, 255))
@@ -51,6 +52,8 @@ tank_surface = pygame.Surface((120, bottom_bounds)).convert()
 missile_surface = pygame.Surface((120, bottom_bounds)).convert()
 seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
 pause_surface = pygame.Surface((120, bottom_bounds)).convert()
+border_surface = pygame.Surface((3, bottom_bounds)).convert()
+border_surface.fill(black)
 blue_surface = pygame.Surface((1015, 768)).convert()
 blue_surface.fill(blue)
 play_surface = pygame.Surface((300, 100)).convert()
@@ -61,11 +64,16 @@ yes_music_surface = pygame.Surface((50, 50)).convert()
 yes_music_surface.fill(green)
 no_music_surface = pygame.Surface((50, 50)).convert()
 no_music_surface.fill(light_gray)
+back_button_surface = pygame.Surface((120, bottom_bounds)).convert()
+back_button_surface.fill(dark_blue)
+back_button_border_surface = pygame.Surface((122, bottom_bounds + 2)).convert()
+back_button_border_surface.fill(black)
 
 # fonts and text on the top of the game
 font = pygame.font.SysFont("helvetica", 14)
 splash_font = pygame.font.SysFont("helvetica", 80)
 title_font = pygame.font.SysFont("helvetica", 125)
+
 tank_text = font.render("Tank", True, black)
 tank_cost = font.render("$1 000", True, black)
 missile_text = font.render("Missile Launcher", True, black)
@@ -73,13 +81,17 @@ missile_cost = font.render("$10 000", True, black)
 mine_text = font.render("Sea Mine", True, black)
 mine_cost = font.render("$50 000", True, black)
 paused = font.render("", True, black)
+
 play_text = splash_font.render("Play".center(11), True, black)
 settings_text = splash_font.render("Settings".center(11), True, black)
+
 title_text = title_font.render("WORLD WAR SEA", True, black)
 music_title = splash_font.render("Music Settings: ", True, black)
 yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 escape_settings = font.render("Click 'q' on the keyboard to go back to the home page", True, black)
+
+go_back_home = font.render("Return Home", True, black)
 
 # setting up coordinate variables
 x = 0
@@ -161,6 +173,10 @@ while keep_going:
                         pause = False
                     elif not pause:  # if the game is not already paused
                         pause = True
+                elif y_clicked and 529 < x < 670:
+                    pause = True
+                    splash_screen = True
+                    img = []
                 elif (not pause) and y > 150:  # if the main gameplay part is pressed
                     overlap = False
                     for image in img:
@@ -285,8 +301,8 @@ while keep_going:
             for bullet_pointer in range(0, len(img[ship_pointer][5])):  # looping through bullets
                 if not (img[ship_pointer][5][bullet_pointer] is None):  # if the bullet exists and has not been deleted
                     if not pause:
-                        img[ship_pointer][5][bullet_pointer][1] += 6 * img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
-                        img[ship_pointer][5][bullet_pointer][2] += 6 * img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                        img[ship_pointer][5][bullet_pointer][1] += 5 * img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                        img[ship_pointer][5][bullet_pointer][2] += 5 * img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
                     if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
                         screen.blit(img[ship_pointer][5][bullet_pointer][0], (img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
                     else:
@@ -304,7 +320,7 @@ while keep_going:
                 angle = math.atan((x_enemy - img[ship_pointer][1] + (norm_enemy_ship.get_size ()[0] / 2)) / lower) * 180 / 3.14  # finding the angle the tank needs to be pointed to
             if img[ship_pointer][2] <= y_enemy:  # if the tank is higher than the ship, invert it
                 img[ship_pointer][6] += 1  # add one to the ship's timer
-            if img[ship_pointer][6] == 5:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
+            if img[ship_pointer][6] == 20:  # if the ship's timer is five, reset it, and if the game is not paused, spawn a bullet
                 img[ship_pointer][6] = 0
                 if not pause:
                     img[ship_pointer][5].append ([rocket, img[ship_pointer][1] + (ball.get_size ()[0] / 2) - 15, img[ship_pointer][2] + (ball.get_size ()[1] / 2), math.sin (angle * 3.14 / 180), math.cos (angle * 3.14 / 180)])
@@ -314,8 +330,8 @@ while keep_going:
             for bullet_pointer in range (0, len (img[ship_pointer][5])):  # looping through bullets
                 if not (img[ship_pointer][5][bullet_pointer] is None):  # if the bullet actually exists and has not been deleted
                     if not pause:
-                        img[ship_pointer][5][bullet_pointer][1] += 12 * img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
-                        img[ship_pointer][5][bullet_pointer][2] += 12 * img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
+                        img[ship_pointer][5][bullet_pointer][1] += 6 * img[ship_pointer][5][bullet_pointer][3]  # moving the bullet's x
+                        img[ship_pointer][5][bullet_pointer][2] += 6 * img[ship_pointer][5][bullet_pointer][4]  # moving the bullet's y
                     if 0 < img[ship_pointer][5][bullet_pointer][1] < 1015 and 0 < img[ship_pointer][5][bullet_pointer][2] < 768:  # only blit it if it is on the screen, otherwise delete it
                         screen.blit(img[ship_pointer][5][bullet_pointer][0],(img[ship_pointer][5][bullet_pointer][1], img[ship_pointer][5][bullet_pointer][2]))
                     else:
@@ -336,20 +352,21 @@ while keep_going:
     screen.blit(missile_surface, (140, top_bounds))
     screen.blit(border, (269, top_bounds-1))
     screen.blit(seamine_surface, (270, top_bounds))
-    screen.blit(main_border, (534, top_bounds-1))
-    screen.blit(display, (535, top_bounds))
+    screen.blit(main_border, (704, top_bounds-1))
+    screen.blit(display, (705, top_bounds))
     screen.blit(border, (399, top_bounds - 1))
     screen.blit(pause_surface, (400, top_bounds))
 
     scale = 150
     top_bounds = 100
     screen.blit(paused, (408, 50))
-    screen.blit(islandsdestroyed_text, (400+scale, top_bounds+15))
-    screen.blit(chance_text, (650+scale, top_bounds+15))
-    screen.blit(shipsdestroyed_text, (400+scale, top_bounds-25))
-    screen.blit(shipsremaining_text, (650+scale, top_bounds-25))
-    screen.blit(money_text, (400+scale, top_bounds-65))
-    screen.blit(numweapons_text, (650+scale, top_bounds-65))
+    screen.blit(islandsdestroyed_text, (400+scale + 200, top_bounds+15))
+    screen.blit(shipsdestroyed_text, (400+scale +200, top_bounds-25))
+    screen.blit(money_text, (400+scale + 200, top_bounds-65))
+    screen.blit(shipsremaining_text, (650+scale + 100, top_bounds-25))
+    screen.blit(numweapons_text, (650+scale + 100, top_bounds-65))
+    screen.blit(chance_text, (650+scale + 100, top_bounds+15))
+
     scale = 50
     screen.blit(tank_text, (scale, top_bounds))
     screen.blit(missile_text, (110+scale, top_bounds))
@@ -357,6 +374,10 @@ while keep_going:
     screen.blit(tank_cost, (scale, top_bounds+15))
     screen.blit(missile_cost, (scale+110, top_bounds+15))
     screen.blit(mine_cost, (250+scale, top_bounds+15))
+
+    screen.blit(back_button_border_surface, (529, top_bounds - 91))
+    screen.blit(back_button_surface, (530, top_bounds-90))
+    screen.blit(go_back_home, (535, top_bounds - 45))
 
     screen.blit(ball, (scale+3, 50))
     screen.blit(missile, (scale+98, 50))
