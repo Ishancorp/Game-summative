@@ -202,7 +202,7 @@ while keep_going:
             norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, 90)
             rotate = True
             norm_enemy_list[0][1] += speed_enemy
-            norm_enemy_list[0][2] += 100
+            norm_enemy_list[0][2] += 150
         elif norm_enemy_list[0][2] == 350:
             norm_enemy_ship = pygame.transform.rotate(norm_enemy_ship, -90)
             rotate = False
@@ -226,7 +226,7 @@ while keep_going:
         if img[ship_pointer][3] == "T":  # if the item is a tank
             lower = norm_enemy_list[0][2]-img[ship_pointer][2]-20+(norm_enemy_ship.get_size()[1]/2)  # this code will be the divisor, may be equal to zero at times
             if lower == 0:  # if the divisor is zero, set it to a very large number
-                lower = 0.1**23
+                lower = -10**23
             angle += math.atan((norm_enemy_list[0][1]-img[ship_pointer][1]+(norm_enemy_ship.get_size()[0]/2))/lower)*180/3.14  # finding the angle the tank needs to be pointed to
             if img[ship_pointer][2] >= norm_enemy_list[0][2]:  # if the tank is higher than the ship, invert it
                 angle += 180
