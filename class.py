@@ -1,12 +1,19 @@
+# Ishan Sharma and Aryan Kukreja
+# For Mr. Cope
+# April 23, 2016
+
+# Main.py
+# An RTS game
+
+# Input: Mouse clicks
+# Output: Gameplay
+
 import pygame
 from pygame.locals import *
 import math
 
 pygame.init()
-
-pygame.init()
 screen = pygame.display.set_mode((1015, 768))
-
 
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert_alpha()  # the background pic needs to be 1015x595 px.
@@ -35,6 +42,7 @@ display = pygame.Surface((475, bottom_bounds)).convert()
 display.fill(gray)
 white_surface = pygame.Surface((1015, 173)).convert()
 white_surface.fill((255, 255, 255))
+
 tank_surface = pygame.Surface((120, bottom_bounds)).convert()
 missile_surface = pygame.Surface((120, bottom_bounds)).convert()
 seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
@@ -121,6 +129,8 @@ class Bullet(pygame.sprite.Sprite):
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0]/2)) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1]/2)):
                 self.active = False
                 enemy.health -= 1
+        if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
+            self.active = False
 
 
 class Tank(pygame.sprite.Sprite):
@@ -141,7 +151,7 @@ class Tank(pygame.sprite.Sprite):
                 lower = 10**100
             self.angle = math.atan((self.x-(enemy.x+(enemy.image.get_size()[0]/2)))/lower)
             if self.y < enemy.y:
-                self.angle += 90
+                self.angle -= 180
             self.timer += 1
             if self.timer == 10 and 500 > self.x-enemy.x > -500 and 250 > self.y-enemy.y > -250:
                 bullet_group.add(Bullet(self.x, self.y, self.angle))
@@ -206,7 +216,6 @@ class Ship(pygame.sprite.Sprite):
             self.dir_y = 0
             self.dir_x = 0
         self.rect.move_ip(self.speed * self.dir_x, self.speed * self.dir_y)
-
         if self.health == 0:
             self.active = False
 
@@ -229,42 +238,52 @@ while keep_going:
     for ev in pygame.event.get():
         if ev.type == QUIT:
             keep_going = False
+
         elif ev.type == MOUSEBUTTONDOWN:
             x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
             y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
             y_clicked = 131 > y > 9
+
             if 131 > x > 9 and y_clicked:  # if the tank part of the menu is pressed
                 tank_pressed = True
                 missile_pressed = False
                 seamine_pressed = False
+
             elif 245 > x > 139 and y_clicked:  # if the missile part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = True
                 seamine_pressed = False
-                print(0)
+
             elif 391 > x > 245 and y_clicked:  # if the sea mine part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = False
                 seamine_pressed = True
+
             elif y_clicked and 400 < x < 520:  # if any other part of the menu is pressed
                 if pause:  # if the game is already paused
                     pause = False
                 elif not pause:  # if the game is not already paused
                     pause = True
+
             elif (not pause) and y > 150:  # if the main gameplay part is pressed
                 item = 0
                 pathway_pressed = (y < 243 and x > 140) or (383 < y < 453 and x < 840) or (595 >= y > 525 and x > 140) or (y > 595 and x > 840)
+
                 if tank_pressed and pathway_pressed and (money - tank_price) >= 0:
                     player_group.add(Tank(x, y))
                     money -= tank_price
+
                 elif missile_pressed and pathway_pressed and money - missile_price >= 0:
                     player_group.add(MissileLauncher())
                     money -= missile_price
+
                 elif seamine_pressed and money - mine_price >= 0 and not pathway_pressed:
                     player_group.add(Mine(x, y))
                     money -= mine_price
+
                 else:
                     break
+
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
@@ -284,6 +303,13 @@ while keep_going:
     else:
         seamine_surface.fill(pressed)
 
+    if pause:
+        pause_surface.fill(red)
+        paused = "Paused"
+    else:
+        pause_surface.fill(green)
+        paused = "Resumed"
+
     for warship in ship_group.sprites():
         pass
 
@@ -292,6 +318,16 @@ while keep_going:
         ship_group.update()
         player_group.update()
         bullet_group.update()
+
+    money_text = font.render("Money: $"+str(money), True, black)
+    numweapons_text = font.render("Weapons: "+str(0), True, black)
+    islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
+    chance_text = font.render("Chances: "+str(chances), True, black)
+    shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
+    shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
+    paused_text = font.render(paused, True, black)
+
+    # Blitting
     for player in player_group.sprites():
         screen.blit(player.image, (player.x, player.y))
     for projectile in bullet_group:
@@ -306,13 +342,6 @@ while keep_going:
             ship_group.remove(ship)
 
 
-    money_text = font.render("Money: $"+str(money), True, black)
-    numweapons_text = font.render("Weapons: "+str(0), True, black)
-    islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
-    chance_text = font.render("Chances: "+str(chances), True, black)
-    shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
-    shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
-
     top_bounds = 10
     screen.blit(white_surface, (0, 0))
     screen.blit(border, (9, top_bounds-1))
@@ -321,8 +350,10 @@ while keep_going:
     screen.blit(missile_surface, (140, top_bounds))
     screen.blit(border, (269, top_bounds-1))
     screen.blit(seamine_surface, (270, top_bounds))
-    screen.blit(main_border, (519, top_bounds-1))
-    screen.blit(display, (520, top_bounds))
+    screen.blit(border, (399, top_bounds-1))
+    screen.blit(pause_surface, (400, top_bounds))
+    screen.blit(main_border, (529, top_bounds-1))
+    screen.blit(display, (530, top_bounds))
     scale = 150
     top_bounds = 100
     screen.blit(islandsdestroyed_text, (400+scale, top_bounds+15))
@@ -338,6 +369,7 @@ while keep_going:
     screen.blit(tank_cost, (scale, top_bounds+15))
     screen.blit(missile_cost, (scale+100, top_bounds+15))
     screen.blit(mine_cost, (250+scale, top_bounds+15))
+    screen.blit(paused_text, (375+scale, top_bounds-15))
 
     screen.blit(ball, (scale+3, 50))
     screen.blit(missile, (scale+98, 50))
