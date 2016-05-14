@@ -83,8 +83,7 @@ class Rocket(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, angle_missile):
         pygame.sprite.Sprite.__init__(self)
         self.angle = angle_missile
-        self.image = pygame.transform.rotate(rocket_image, math.degrees(self.angle))
-        print(math.degrees(self.angle))
+        self.image = pygame.transform.rotate(rocket_image, self.angle)
         self.rect = self.image.get_rect()
         self.x = x_pos
         self.y = y_pos
@@ -122,7 +121,7 @@ class Mine(pygame.sprite.Sprite):
         self.x = self.rect.left
         self.y = self.rect.top
         for enemy in ship_group:
-            if enemy.x+enemy.image.get_size()[0] >= self.x >= enemy.x and enemy.y+enemy.image.get_size()[1] >= self.y >= enemy.y:
+            if (enemy.x+enemy.image.get_size()[0] >= self.x >= enemy.x or enemy.x+enemy.image.get_size()[0] >= self.x + mine_image.get_size()[1] >= enemy.x) and (enemy.y+enemy.image.get_size()[1] >= self.y >= enemy.y or enemy.y+enemy.image.get_size()[1] >= self.y + mine_image.get_size()[1] >= enemy.y):
                 self.active = False
                 enemy.health -= 50
 
