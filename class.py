@@ -17,10 +17,12 @@ screen = pygame.display.set_mode((1015, 768))
 
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game initial sketch.png").convert_alpha()  # the background pic needs to be 1015x595 px.
-ball = pygame.image.load("Tank.gif").convert_alpha()  # must be 35x35, or (some multiple of 35)x(some multiple of 35)
-missile = pygame.image.load("missile.png").convert_alpha()
-mine = pygame.image.load("Army mine.png").convert()
-bullet = pygame.image.load("projectile.png").convert_alpha()
+tank_image = pygame.image.load("Tank.gif").convert_alpha()
+missile_image = pygame.image.load("missile.png").convert_alpha()
+mine_image = pygame.image.load("Army mine.png").convert_alpha()
+bullet_image = pygame.image.load("projectile.png").convert_alpha()
+ship_image = pygame.image.load("Army Ship Level 1 (1).gif").convert_alpha()
+rocket_image = pygame.image.load("rocket.gif").convert_alpha()
 
 # Setting up some colours
 dark_gray = (75, 75, 75)
@@ -36,9 +38,9 @@ red = (200, 0, 0)
 bottom_bounds = 155
 border = pygame.Surface((122, bottom_bounds+2)).convert()
 border.fill(dark_gray)
-main_border = pygame.Surface((477, bottom_bounds+2)).convert()
+main_border = pygame.Surface((297, bottom_bounds+2)).convert()
 main_border.fill(dark_gray)
-display = pygame.Surface((475, bottom_bounds)).convert()
+display = pygame.Surface((295, bottom_bounds)).convert()
 display.fill(gray)
 white_surface = pygame.Surface((1015, 173)).convert()
 white_surface.fill((255, 255, 255))
@@ -57,13 +59,6 @@ missile_cost = font.render("$10 000", True, black)
 mine_text = font.render("Sea Mine", True, black)
 mine_cost = font.render("$50 000", True, black)
 paused = font.render("", True, black)
-
-# setting up coordinate variables
-x = 0
-y = 0
-y_enemy = 15
-x_enemy = 100
-enemy_health = 1000
 
 # setting up variables that will be displayed on top
 money = 10000000
@@ -93,11 +88,36 @@ shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True
 shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
 
 
+class Rocket(pygame.sprite.Sprite):
+    def __init__(self, x_pos, y_pos, angle_missile):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = rocket_image
+        self.rect = self.image.get_rect()
+        self.angle = angle_missile
+        self.x = x_pos
+        self.y = y_pos
+        self.dir_x = -8*math.sin(self.angle)
+        self.dir_y = -8*math.cos(self.angle)
+        self.rect.move_ip(self.x + (missile_image.get_size()[0]/2), self.y + (missile_image.get_size()[1]/2))
+        self.active = True
+
+    def update(self):
+        self.image = pygame.transform.rotate(rocket_image, math.radians(self.angle))
+        self.rect.move_ip(self.dir_x, self.dir_y)
+        self.x = self.rect.left
+        self.y = self.rect.top
+        for enemy in ship_group:
+            if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
+                self.active = False
+                enemy.health -= 0.5
+        if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
+            self.active = False
+
+
 class Mine(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Army mine.png").convert_alpha()
-        self.orig_image = self.image
+        self.image = mine_image
         self.rect = self.image.get_rect()
         self.angle = 0
         self.x = x_pos
@@ -105,20 +125,23 @@ class Mine(pygame.sprite.Sprite):
         self.rect.move_ip(self.x, self.y)
         self.active = True
 
+    def update(self):
+        for enemy in ship_group:
+            if enemy.rect.colliderect(self.rect) == 1:
+                self.active = False
+                enemy.health -= 5
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, angle_tank):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("bullet.png").convert_alpha()
-        self.orig_image = self.image
+        self.image = bullet_image
         self.rect = self.image.get_rect()
-        self.angle = 0
-        self.x = x_pos
-        self.y = y_pos
+        self.x = x_pos + (bullet_image.get_size()[0]/2)
+        self.y = y_pos + (bullet_image.get_size()[1]/2)
         self.angle = angle_tank
         self.dir_x = -4*math.sin(self.angle)
         self.dir_y = -4*math.cos(self.angle)
-        self.rect.move_ip(self.x + (ball.get_size()[0]/2), self.y + (ball.get_size()[1]/2))
+        self.rect.move_ip(self.x, self.y)
         self.active = True
 
     def update(self):
@@ -126,7 +149,7 @@ class Bullet(pygame.sprite.Sprite):
         self.x = self.rect.left
         self.y = self.rect.top
         for enemy in ship_group:
-            if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0]/2)) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1]/2)):
+            if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
                 enemy.health -= 1
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -136,41 +159,55 @@ class Bullet(pygame.sprite.Sprite):
 class Tank(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Tank.gif").convert_alpha()
-        self.orig_image = self.image
+        self.image = tank_image
         self.rect = self.image.get_rect()
         self.angle = 0
         self.x = x_pos
         self.y = y_pos
         self.timer = 0
+        self.active = True
 
     def update(self):
         for enemy in ship_group:
-            lower = (self.y-enemy.y+(enemy.image.get_size()[1]/2))
+            lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
             if lower == 0:
                 lower = 10**100
-            self.angle = math.atan((self.x-(enemy.x+(enemy.image.get_size()[0]/2)))/lower)
+            self.angle = math.atan((self.x-abs(enemy.x+(enemy.image.get_size()[0]/2)))/lower)
             if self.y < enemy.y:
-                self.angle -= 180
+                self.angle = 135-self.angle
             self.timer += 1
             if self.timer == 10 and 500 > self.x-enemy.x > -500 and 250 > self.y-enemy.y > -250:
                 bullet_group.add(Bullet(self.x, self.y, self.angle))
                 self.timer = 0
-            self.image = pygame.transform.rotate(self.orig_image, math.degrees(self.angle))
+            self.image = pygame.transform.rotate(tank_image, math.degrees(self.angle))
 
 
 class MissileLauncher(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("missile.png").convert_alpha()
-        self.orig_image = self.image
+        self.image = missile_image
         self.rect = self.image.get_rect()
         self.angle = 0
         self.x = x
         self.y = y
+        self.timer = 0
+        self.active = True
 
     def update(self):
-        pass
+        for enemy in ship_group:
+            lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
+            if lower == 0:
+                lower = 10**100
+            self.angle = math.atan((self.x-abs(enemy.x))/lower)
+            if self.y < enemy.y:
+                self.angle = 135-self.angle
+            self.timer += 1
+            if self.timer == 20 and 500 > self.x-enemy.x > -500 and 250 > self.y-enemy.y > -250:
+                bullet_group.add(Rocket(self.x+(1.25*missile_image.get_size()[0]/7), self.y, self.angle))
+                bullet_group.add(Rocket(self.x+(1.1*missile_image.get_size()[0]/3), self.y, self.angle))
+                bullet_group.add(Rocket(self.x+(1.625*missile_image.get_size()[0]/3), self.y, self.angle))
+                bullet_group.add(Rocket(self.x+0.73*missile_image.get_size()[0], self.y, self.angle))
+                self.timer = 0
 
 
 class Ship(pygame.sprite.Sprite):
@@ -185,7 +222,7 @@ class Ship(pygame.sprite.Sprite):
         self.y = 15
         self.speed = 1
         self.rect.move_ip(self.x, self.y)
-        self.health = 100
+        self.health = 200
         self.active = True
 
     def update(self):
@@ -197,10 +234,11 @@ class Ship(pygame.sprite.Sprite):
         elif self.y == 170:
             self.image = pygame.transform.rotate(self.image, 90)
             self.dir_y = 100
-        elif self.y > 170 and self.x < 950:
+        elif self.y > 170 and self.x < 850:
             self.dir_y = 0
             self.dir_x = 1
-        elif 950 < self.rect.left:
+        elif 850 < self.rect.left:
+            print(0)
             self.dir_y = 1
             self.dir_x = 0
         elif (385 < self.rect.top < 500) and 990 < self.rect.left:
@@ -216,20 +254,16 @@ class Ship(pygame.sprite.Sprite):
             self.dir_y = 0
             self.dir_x = 0
         self.rect.move_ip(self.speed * self.dir_x, self.speed * self.dir_y)
-        if self.health == 0:
+        if self.health <= 0:
             self.active = False
 
 
 ship_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
-for counter in range(0, 1):
+for counter in range(0, 2):
     warship = Ship()
     ship_group.add(warship)
 player_group = pygame.sprite.Group()
-
-background = pygame.Surface(screen.get_size()).convert()
-background.fill((255, 255, 255))
-screen.blit(background, (0, 0))
 
 clock = pygame.time.Clock()
 keep_going = True
@@ -244,22 +278,22 @@ while keep_going:
             y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
             y_clicked = 131 > y > 9
 
-            if 131 > x > 9 and y_clicked:  # if the tank part of the menu is pressed
+            if 231 > x > 109 and y_clicked:  # if the tank part of the menu is pressed
                 tank_pressed = True
                 missile_pressed = False
                 seamine_pressed = False
 
-            elif 245 > x > 139 and y_clicked:  # if the missile part of the menu is pressed
+            elif 345 > x > 239 and y_clicked:  # if the missile part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = True
                 seamine_pressed = False
 
-            elif 391 > x > 245 and y_clicked:  # if the sea mine part of the menu is pressed
+            elif 491 > x > 345 and y_clicked:  # if the sea mine part of the menu is pressed
                 tank_pressed = False
                 missile_pressed = False
                 seamine_pressed = True
 
-            elif y_clicked and 400 < x < 520:  # if any other part of the menu is pressed
+            elif y_clicked and 500 < x < 620:  # if any other part of the menu is pressed
                 if pause:  # if the game is already paused
                     pause = False
                 elif not pause:  # if the game is not already paused
@@ -268,21 +302,27 @@ while keep_going:
             elif (not pause) and y > 150:  # if the main gameplay part is pressed
                 item = 0
                 pathway_pressed = (y < 243 and x > 140) or (383 < y < 453 and x < 840) or (595 >= y > 525 and x > 140) or (y > 595 and x > 840)
+                overlap = False
 
-                if tank_pressed and pathway_pressed and (money - tank_price) >= 0:
-                    player_group.add(Tank(x, y))
-                    money -= tank_price
+                for player in player_group.sprites():
+                    if x == player.x and y == player.y:
+                        overlap = True
 
-                elif missile_pressed and pathway_pressed and money - missile_price >= 0:
-                    player_group.add(MissileLauncher())
-                    money -= missile_price
+                if not overlap:
+                    if tank_pressed and pathway_pressed and (money - tank_price) >= 0:
+                        player_group.add(Tank(x, y))
+                        money -= tank_price
 
-                elif seamine_pressed and money - mine_price >= 0 and not pathway_pressed:
-                    player_group.add(Mine(x, y))
-                    money -= mine_price
+                    elif missile_pressed and pathway_pressed and money - missile_price >= 0:
+                        player_group.add(MissileLauncher())
+                        money -= missile_price
 
-                else:
-                    break
+                    elif seamine_pressed and money - mine_price >= 0 and not pathway_pressed:
+                        player_group.add(Mine(x, y))
+                        money -= mine_price
+
+                    else:
+                        break
 
     if not tank_pressed:
         tank_surface.fill(gray)
@@ -305,10 +345,10 @@ while keep_going:
 
     if pause:
         pause_surface.fill(red)
-        paused = "Paused"
+        paused = "Paused".center(7)
     else:
         pause_surface.fill(green)
-        paused = "Resumed"
+        paused = "Resumed".center(7)
 
     for warship in ship_group.sprites():
         pass
@@ -329,7 +369,10 @@ while keep_going:
 
     # Blitting
     for player in player_group.sprites():
-        screen.blit(player.image, (player.x, player.y))
+        if player.active:
+            screen.blit(player.image, (player.x, player.y))
+        else:
+            player_group.remove(player)
     for projectile in bullet_group:
         if projectile.active:
             screen.blit(projectile.image, (projectile.x, projectile.y))
@@ -337,41 +380,41 @@ while keep_going:
             bullet_group.remove(projectile)
     for ship in ship_group.sprites():
         if ship.active:
-            screen.blit(ship.image, (ship.x, ship.y))
+            screen.blit(ship.image, (ship.x, ship.y - 2))
         else:
             ship_group.remove(ship)
 
-
     top_bounds = 10
+    left_bounds = 109
     screen.blit(white_surface, (0, 0))
-    screen.blit(border, (9, top_bounds-1))
-    screen.blit(tank_surface, (10, top_bounds))
-    screen.blit(border, (139, top_bounds-1))
-    screen.blit(missile_surface, (140, top_bounds))
-    screen.blit(border, (269, top_bounds-1))
-    screen.blit(seamine_surface, (270, top_bounds))
-    screen.blit(border, (399, top_bounds-1))
-    screen.blit(pause_surface, (400, top_bounds))
-    screen.blit(main_border, (529, top_bounds-1))
-    screen.blit(display, (530, top_bounds))
+    screen.blit(border, (left_bounds, top_bounds-1))
+    screen.blit(tank_surface, (1+left_bounds, top_bounds))
+    screen.blit(border, (130+left_bounds, top_bounds-1))
+    screen.blit(missile_surface, (131+left_bounds, top_bounds))
+    screen.blit(border, (260+left_bounds, top_bounds-1))
+    screen.blit(seamine_surface, (261+left_bounds, top_bounds))
+    screen.blit(border, (390+left_bounds, top_bounds-1))
+    screen.blit(pause_surface, (391+left_bounds, top_bounds))
+    screen.blit(main_border, (605+left_bounds, top_bounds-1))
+    screen.blit(display, (606+left_bounds, top_bounds))
+
     scale = 150
     top_bounds = 100
-    screen.blit(islandsdestroyed_text, (400+scale, top_bounds+15))
-    screen.blit(chance_text, (650+scale, top_bounds+15))
-    screen.blit(shipsdestroyed_text, (400+scale, top_bounds-25))
-    screen.blit(shipsremaining_text, (650+scale, top_bounds-25))
-    screen.blit(money_text, (400+scale, top_bounds-65))
-    screen.blit(numweapons_text, (650+scale, top_bounds-65))
-    scale = 50
-    screen.blit(tank_text, (scale, top_bounds))
-    screen.blit(missile_text, (100+scale, top_bounds))
-    screen.blit(mine_text, (250+scale, top_bounds))
-    screen.blit(tank_cost, (scale, top_bounds+15))
-    screen.blit(missile_cost, (scale+100, top_bounds+15))
-    screen.blit(mine_cost, (250+scale, top_bounds+15))
-    screen.blit(paused_text, (375+scale, top_bounds-15))
+    screen.blit(islandsdestroyed_text, (575+scale, top_bounds+15))
+    screen.blit(chance_text, (725+scale, top_bounds+15))
+    screen.blit(shipsdestroyed_text, (575+scale, top_bounds-25))
+    screen.blit(shipsremaining_text, (725+scale, top_bounds-25))
+    screen.blit(money_text, (575+scale, top_bounds-65))
+    screen.blit(numweapons_text, (725+scale, top_bounds-65))
+    screen.blit(tank_text, (41+left_bounds, top_bounds))
+    screen.blit(missile_text, (141+left_bounds, top_bounds))
+    screen.blit(mine_text, (290+left_bounds, top_bounds))
+    screen.blit(tank_cost, (41+left_bounds, top_bounds+15))
+    screen.blit(missile_cost, (left_bounds+141, top_bounds+15))
+    screen.blit(mine_cost, (291+left_bounds, top_bounds+15))
+    screen.blit(paused_text, (419+left_bounds, top_bounds-15))
 
-    screen.blit(ball, (scale+3, 50))
-    screen.blit(missile, (scale+98, 50))
-    screen.blit(mine, (scale+260, 50))
+    screen.blit(tank_image, (left_bounds+44, 50))
+    screen.blit(missile_image, (left_bounds+139, 50))
+    screen.blit(mine_image, (left_bounds+301, 50))
     pygame.display.flip()
