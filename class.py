@@ -79,26 +79,18 @@ sprite_type = ""
 angle = 0
 
 
-# render text with new values for every variable
-money_text = font.render("Money: $"+str(money), True, black)
-numweapons_text = font.render("Weapons: "+str(0), True, black)
-islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
-chance_text = font.render("Chances: "+str(chances), True, black)
-shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
-shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
-
-
 class Rocket(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, angle_missile):
         pygame.sprite.Sprite.__init__(self)
-        self.image = rocket_image
-        self.rect = self.image.get_rect()
         self.angle = angle_missile
+        self.image = pygame.transform.rotate(rocket_image, math.degrees(self.angle))
+        print(math.degrees(self.angle))
+        self.rect = self.image.get_rect()
         self.x = x_pos
         self.y = y_pos
-        self.dir_x = -8*math.sin(self.angle)
-        self.dir_y = -8*math.cos(self.angle)
-        self.rect.move_ip(self.x + (missile_image.get_size()[0]/2), self.y + (missile_image.get_size()[1]/2))
+        self.dir_x = -16*math.sin(self.angle)
+        self.dir_y = -16*math.cos(self.angle)
+        self.rect.move_ip(self.x, self.y)
         self.active = True
 
     def update(self):
@@ -124,24 +116,28 @@ class Mine(pygame.sprite.Sprite):
         self.y = y_pos
         self.rect.move_ip(self.x, self.y)
         self.active = True
+        self.type = "S"
 
     def update(self):
+        self.x = self.rect.left
+        self.y = self.rect.top
         for enemy in ship_group:
-            if enemy.rect.colliderect(self.rect) == 1:
+            if enemy.x+enemy.image.get_size()[0] >= self.x >= enemy.x and enemy.y+enemy.image.get_size()[1] >= self.y >= enemy.y:
                 self.active = False
-                enemy.health -= 5
+                enemy.health -= 50
+
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, angle_tank):
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet_image
         self.rect = self.image.get_rect()
-        self.x = x_pos + (bullet_image.get_size()[0]/2)
-        self.y = y_pos + (bullet_image.get_size()[1]/2)
+        self.x = x_pos + (tank_image.get_size()[0]/2)
+        self.y = y_pos + (tank_image.get_size()[1]/2)
         self.angle = angle_tank
-        self.dir_x = -4*math.sin(self.angle)
-        self.dir_y = -4*math.cos(self.angle)
-        self.rect.move_ip(self.x, self.y)
+        self.dir_x = -8*math.sin(self.angle)
+        self.dir_y = -8*math.cos(self.angle)
+        self.rect.move_ip(self.x + (bullet_image.get_size()[0]/2), self.y + (bullet_image.get_size()[1]/2))
         self.active = True
 
     def update(self):
@@ -166,20 +162,25 @@ class Tank(pygame.sprite.Sprite):
         self.y = y_pos
         self.timer = 0
         self.active = True
+        self.type = "T"
+        self.angle_adjust = 0
 
     def update(self):
         for enemy in ship_group:
-            lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
-            if lower == 0:
-                lower = 10**100
-            self.angle = math.atan((self.x-abs(enemy.x+(enemy.image.get_size()[0]/2)))/lower)
-            if self.y < enemy.y:
-                self.angle = 135-self.angle
-            self.timer += 1
-            if self.timer == 10 and 500 > self.x-enemy.x > -500 and 250 > self.y-enemy.y > -250:
-                bullet_group.add(Bullet(self.x, self.y, self.angle))
-                self.timer = 0
-            self.image = pygame.transform.rotate(tank_image, math.degrees(self.angle))
+            if 500 > self.x-enemy.x > -500 and 250 > self.y-enemy.y > -250:
+                lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
+                if lower == 0:
+                    lower = 10**100
+                self.angle = math.atan((self.x-abs(enemy.x+(enemy.image.get_size()[0]/2)))/lower)
+                self.angle_adjust = self.angle * 35/math.pi
+                if self.y < enemy.y:
+                    self.angle = 135-self.angle
+                self.timer += 1
+                if self.timer == 5:
+                    bullet_group.add(Bullet(self.x, self.y, self.angle))
+                    self.timer = 0
+                self.image = pygame.transform.rotate(tank_image, math.degrees(self.angle))
+                break
 
 
 class MissileLauncher(pygame.sprite.Sprite):
@@ -192,37 +193,40 @@ class MissileLauncher(pygame.sprite.Sprite):
         self.y = y
         self.timer = 0
         self.active = True
+        self.type = "M"
 
     def update(self):
         for enemy in ship_group:
-            lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
-            if lower == 0:
-                lower = 10**100
-            self.angle = math.atan((self.x-abs(enemy.x))/lower)
-            if self.y < enemy.y:
-                self.angle = 135-self.angle
-            self.timer += 1
-            if self.timer == 20 and 500 > self.x-enemy.x > -500 and 250 > self.y-enemy.y > -250:
-                bullet_group.add(Rocket(self.x+(1.25*missile_image.get_size()[0]/7), self.y, self.angle))
-                bullet_group.add(Rocket(self.x+(1.1*missile_image.get_size()[0]/3), self.y, self.angle))
-                bullet_group.add(Rocket(self.x+(1.625*missile_image.get_size()[0]/3), self.y, self.angle))
-                bullet_group.add(Rocket(self.x+0.73*missile_image.get_size()[0], self.y, self.angle))
-                self.timer = 0
+            if 500 > self.x-enemy.x > -500 and 500 > self.y-enemy.y > -500:
+                lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
+                if lower == 0:
+                    lower = 10**100
+                self.angle = math.atan((self.x-abs(enemy.x))/lower)
+                if self.y < enemy.y:
+                    self.angle = 135-self.angle
+                self.timer += 1
+                if self.timer == 10:
+                    bullet_group.add(Rocket(self.x+(1.25*missile_image.get_size()[0]/7), self.y, self.angle))
+                    bullet_group.add(Rocket(self.x+(1.1*missile_image.get_size()[0]/3), self.y, self.angle))
+                    bullet_group.add(Rocket(self.x+(1.625*missile_image.get_size()[0]/3), self.y, self.angle))
+                    bullet_group.add(Rocket(self.x+0.73*missile_image.get_size()[0], self.y, self.angle))
+                    self.timer = 0
+                break
 
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("Army Ship Level 1 (1).gif").convert_alpha()
         self.rect = self.image.get_rect()
 
         self.dir_x = 0
         self.dir_y = 0
-        self.x = 100
-        self.y = 15
+        self.x = x_pos
+        self.y = y_pos
         self.speed = 1
         self.rect.move_ip(self.x, self.y)
-        self.health = 200
+        self.health = 500
         self.active = True
 
     def update(self):
@@ -231,10 +235,10 @@ class Ship(pygame.sprite.Sprite):
         if self.y < 170:
             self.dir_y = 1
             self.dir_x = 0
-        elif self.y == 170:
+        elif self.y == 175:
             self.image = pygame.transform.rotate(self.image, 90)
             self.dir_y = 100
-        elif self.y > 170 and self.x < 850:
+        elif self.y > 175 and self.x < 850:
             self.dir_y = 0
             self.dir_x = 1
         elif 850 < self.rect.left:
@@ -260,9 +264,8 @@ class Ship(pygame.sprite.Sprite):
 
 ship_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
-for counter in range(0, 2):
-    warship = Ship()
-    ship_group.add(warship)
+ship_group.add(Ship(100, 15))
+ship_group.add(Ship(100, -500))
 player_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
@@ -305,7 +308,7 @@ while keep_going:
                 overlap = False
 
                 for player in player_group.sprites():
-                    if x == player.x and y == player.y:
+                    if (x == player.x and y == player.y) or (missile_pressed and player.type == "M" and (player.x-70 <= x <= player.x+70 and y == player.y)):
                         overlap = True
 
                 if not overlap:
@@ -370,7 +373,10 @@ while keep_going:
     # Blitting
     for player in player_group.sprites():
         if player.active:
-            screen.blit(player.image, (player.x, player.y))
+            if player.type == "T":
+                screen.blit(player.image, (player.x, player.y))
+            else:
+                screen.blit(player.image, (player.x, player.y))
         else:
             player_group.remove(player)
     for projectile in bullet_group:
