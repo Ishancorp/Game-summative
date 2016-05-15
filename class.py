@@ -95,9 +95,9 @@ title_text = title_font.render("WORLD WAR SEA", True, black)
 music_title = splash_font.render("Music Settings: ", True, black)
 yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
-return_home = font.render("Click here to go back to the main menu", True, black)
+return_home = font.render("Back", True, black)
 
-go_back_home = font.render("Return Home", True, black)
+go_back_home = font.render("Back", True, black)
 
 # setting up variables that will be displayed on top
 money = 100000
@@ -407,9 +407,10 @@ while keep_going:
 
                         else:
                             break
+
     ship_spawns += 1
     if ship_spawns == 200:
-        ship_group.add(Ship(100 + randint(-20, 20), 173 - ship.image.get_size()[1]))
+        ship_group.add(Ship(100 + randint(-20, 20), 0))
         ship_spawns = 0
     if not tank_pressed:
         tank_surface.fill(gray)
