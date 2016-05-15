@@ -157,7 +157,7 @@ class Mine(pygame.sprite.Sprite):
         self.angle = 0
         self.x = x_pos
         self.y = y_pos
-        self.rect.move_ip(self.x, self.y)
+        self.rect.move_ip(self.x, self.y) 
         self.active = True
         self.type = "S"
 
