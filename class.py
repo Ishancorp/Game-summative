@@ -11,6 +11,7 @@
 import pygame
 from pygame.locals import *
 import math
+from random import randint
 
 pygame.init()
 screen = pygame.display.set_mode((1015, 768))
@@ -61,7 +62,7 @@ mine_cost = font.render("$50 000", True, black)
 paused = font.render("", True, black)
 
 # setting up variables that will be displayed on top
-money = 10000000
+money = 100000
 chances = 3
 pause = False
 ships_destroyed = 0
@@ -70,9 +71,11 @@ tank_pressed = True
 missile_pressed = False
 seamine_pressed = False
 
+
 tank_price = 1000
 mine_price = 50000
 missile_price = 10000
+ship_spawns = 0
 
 # variables relating to tank
 sprite_type = ""
@@ -100,7 +103,7 @@ class Rocket(pygame.sprite.Sprite):
         for enemy in ship_group:
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
-                enemy.health -= 0.5
+                enemy.health -= 3
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
             self.active = False
 
@@ -225,8 +228,9 @@ class Ship(pygame.sprite.Sprite):
         self.y = y_pos
         self.speed = 1
         self.rect.move_ip(self.x, self.y)
-        self.health = 500
+        self.health = 2000
         self.active = True
+        self.money = 0
 
     def update(self):
         self.x = self.rect.left
@@ -240,6 +244,9 @@ class Ship(pygame.sprite.Sprite):
         elif self.y > 175 and self.x < 850:
             self.dir_y = 0
             self.dir_x = 1
+        elif self.y == 175 and self.x == 850:
+            self.image = pygame.transform.rotate(self.image, -90)
+            self.dir_y = -100
         elif 850 < self.rect.left:
             print(0)
             self.dir_y = 1
@@ -259,12 +266,12 @@ class Ship(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed * self.dir_x, self.speed * self.dir_y)
         if self.health <= 0:
             self.active = False
+            self.money = 10000
 
 
 ship_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
 ship_group.add(Ship(100, 15))
-ship_group.add(Ship(100, -500))
 player_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
@@ -325,7 +332,10 @@ while keep_going:
 
                     else:
                         break
-
+    ship_spawns += 1
+    if ship_spawns == 200:
+        ship_group.add(Ship(100 + randint(-10, 10), 15 + randint(-10, 10)))
+        ship_spawns = 0
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
@@ -388,6 +398,7 @@ while keep_going:
             screen.blit(ship.image, (ship.x, ship.y - 2))
         else:
             ship_group.remove(ship)
+            money += ship.money
 
     top_bounds = 10
     left_bounds = 109
