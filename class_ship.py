@@ -108,6 +108,7 @@ ships_remaining = 0
 tank_pressed = True
 missile_pressed = False
 seamine_pressed = False
+wave_interval = 800
 
 
 tank_price = 1000
@@ -121,6 +122,7 @@ angle = 0
 
 splash_screen = True
 settings_screen = False
+game_over = False
 
 
 class Rocket(pygame.sprite.Sprite):
@@ -157,7 +159,7 @@ class Mine(pygame.sprite.Sprite):
         self.angle = 0
         self.x = x_pos
         self.y = y_pos
-        self.rect.move_ip(self.x, self.y) 
+        self.rect.move_ip(self.x, self.y)
         self.active = True
         self.type = "S"
 
@@ -241,10 +243,10 @@ class MissileLauncher(pygame.sprite.Sprite):
     def update(self):
         for enemy in ship_group:
             if 500 > self.x-enemy.x > -500 and 500 > self.y-enemy.y > -500:
-                lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
+                lower = abs(self.y - enemy.y + (enemy.image.get_size()[1]/2))
                 if lower == 0:
                     lower = 10**100
-                self.angle = math.atan((self.x-abs(enemy.x))/lower)
+                self.angle = math.atan((self.x-abs(enemy.x + (enemy.image.get_size()[0]/2)))/lower)
                 if self.y < enemy.y:
                     self.angle = 135-self.angle
                 self.timer += 1
@@ -260,9 +262,9 @@ class MissileLauncher(pygame.sprite.Sprite):
 class Ship(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
-        ship_choice = randint(0, 6)
+        ship_choice = randint(1, 6)
         print(ship_choice)
-        if ship_choice == 0:
+        if ship_choice == 1:
             self.image = ship3_image
             self.health = 8000
             self.late_money = 10000
@@ -359,13 +361,12 @@ while keep_going:
                     print("play")
                     splash_screen = False
                     pause = False
-                    ship_spawns = 499
+                    ship_spawns = wave_interval - 1
                 elif (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 + 100 < y < blue_surface.get_size()[1] / 2 + 200):
                     settings_screen = True
                     splash_screen = False
                     print("settings")
             elif settings_screen:
-                print(x, y)
                 if (160 < x < 300) and (320 < y < 435):
                     music = True
                 elif (160 < x < 300) and (470 < y < 535):
@@ -432,9 +433,11 @@ while keep_going:
 
     if not pause:
         ship_spawns += 1
-        if ship_spawns == 500:
+        if ship_spawns == wave_interval or len(ship_group) == 0:
             ship_group.add(Ship(100 + randint(-40, 40), 0))
             ship_spawns = 0
+            wave_interval *= 0.95
+            wave_interval = int(wave_interval)
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
@@ -496,6 +499,13 @@ while keep_going:
             ship_group.remove(ship)
             money += ship.money
             ships_destroyed += 1
+
+    if chances == 0:
+        pause = True
+        player_group.empty()
+        ship_group.empty()
+        bullet_group.empty()
+        game_over = True
 
     # blitting the top part of the screen
     top_bounds = 10
