@@ -319,7 +319,6 @@ class Ship(pygame.sprite.Sprite):
 
 ship_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
-ship_group.add(Ship(100, 15))
 player_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
@@ -338,6 +337,7 @@ while keep_going:
                     print("play")
                     splash_screen = False
                     pause = False
+                    ship_spawns = 199
                 elif (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 + 100 < y < blue_surface.get_size()[1] / 2 + 200):
                     settings_screen = True
                     splash_screen = False
@@ -409,7 +409,7 @@ while keep_going:
                             break
     ship_spawns += 1
     if ship_spawns == 200:
-        ship_group.add(Ship(100 + randint(-10, 10), 15 + randint(-10, 10)))
+        ship_group.add(Ship(100 + randint(-20, 20), 173 - ship.image.get_size()[1]))
         ship_spawns = 0
     if not tank_pressed:
         tank_surface.fill(gray)
@@ -436,9 +436,6 @@ while keep_going:
     else:
         pause_surface.fill(green)
         paused = "Resumed".center(7)
-
-    for warship in ship_group.sprites():
-        pass
 
     screen.blit(back, (0, 173))
     if not pause:
@@ -519,10 +516,10 @@ while keep_going:
         screen.blit(title_text, (blue_surface.get_size()[0] / 15, blue_surface.get_size()[1] / 2 - 300))
         screen.blit(play_text, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 100))
         screen.blit(settings_text, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
-        
+
     if settings_screen:
         screen.blit(blue_surface, (0, 0))
-        screen.blit(music_title, (blue_surface.get_size ()[0] / 3, blue_surface.get_size()[1] / 2 - 200))
+        screen.blit(music_title, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 200))
         screen.blit(yes_music, (235, 400))
         screen.blit(no_music, (235, 500))
         screen.blit(yes_music_surface, (180, 383))
