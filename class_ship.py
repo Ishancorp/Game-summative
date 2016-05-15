@@ -103,7 +103,7 @@ go_back_home = font.render("Back".center(18), True, black)
 money = 50000
 chances = 3
 pause = True
-ships_destroyed = 0
+ships_destroyed = 2
 ships_remaining = 0
 tank_pressed = True
 missile_pressed = False
@@ -506,7 +506,30 @@ while keep_going:
         ship_group.empty()
         bullet_group.empty()
         game_over = True
-
+        high_scores = []
+        with open("highscores.txt", "r") as file:
+            for line in file:
+                try:
+                    int(line)
+                except:
+                    continue
+                else:
+                    high_scores.append(int(line))
+        done = False
+        if len(high_scores) == 0:
+            high_scores.append(ships_destroyed)
+        else:
+            for score_index in range(0, len(high_scores)):
+                if high_scores[score_index] <= ships_destroyed:
+                    high_scores.insert(score_index - 1, ships_destroyed)
+                    break
+                    done = True
+            if not done:
+                high_scores.append(ships_destroyed)
+        with open("highscores.txt", "w") as file:
+            for score in high_scores:
+                file.write(chr(10)+str(score))
+                chances = 3
     # blitting the top part of the screen
     top_bounds = 10
     screen.blit(white_surface, (0, 0))
