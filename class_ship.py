@@ -101,13 +101,13 @@ yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 return_home = font.render("Back", True, black)
 go_back_home = font.render("Back".center(18), True, black)
-highscore_text = title_font.render("HIGHSCORES".center(18), True, black)
+highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
 money = 50000
-chances = 0
+chances = 3
 pause = True
-ships_destroyed = 15
+ships_destroyed = 0
 ships_remaining = 0
 tank_pressed = True
 missile_pressed = False
@@ -127,6 +127,7 @@ angle = 0
 splash_screen = True
 settings_screen = False
 game_over = False
+score_achieved_index = 11
 
 
 class Rocket(pygame.sprite.Sprite):
@@ -150,7 +151,7 @@ class Rocket(pygame.sprite.Sprite):
         for enemy in ship_group:
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
-                enemy.health -= 5
+                enemy.health -= 4
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
             self.active = False
 
@@ -173,7 +174,7 @@ class Mine(pygame.sprite.Sprite):
         for enemy in ship_group:
             if (enemy.x+enemy.image.get_size()[0] >= self.x >= enemy.x or enemy.x+enemy.image.get_size()[0] >= self.x + mine_image.get_size()[1] >= enemy.x) and (enemy.y+enemy.image.get_size()[1] >= self.y >= enemy.y or enemy.y+enemy.image.get_size()[1] >= self.y + mine_image.get_size()[1] >= enemy.y):
                 self.active = False
-                enemy.health -= 50
+                enemy.health -= 100
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -196,7 +197,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in ship_group:
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
-                enemy.health -= 1
+                enemy.health -= 0.75
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
             self.active = False
 
@@ -254,7 +255,7 @@ class MissileLauncher(pygame.sprite.Sprite):
                 if self.y < enemy.y:
                     self.angle = 135-self.angle
                 self.timer += 1
-                if self.timer == 10:
+                if self.timer == 30:
                     bullet_group.add(Rocket(self.x+(1.25*missile_image.get_size()[0]/7), self.y, self.angle))
                     bullet_group.add(Rocket(self.x+(1.1*missile_image.get_size()[0]/3), self.y, self.angle))
                     bullet_group.add(Rocket(self.x+(1.625*missile_image.get_size()[0]/3), self.y, self.angle))
@@ -270,15 +271,15 @@ class Ship(pygame.sprite.Sprite):
         print(ship_choice)
         if ship_choice == 1:
             self.image = ship3_image
-            self.health = 8000
+            self.health = 2000
             self.late_money = 10000
         elif 2 <= ship_choice <= 3:
             self.image = ship2_image
-            self.health = 5000
+            self.health = 1625
             self.late_money = 5000
         else:
             self.image = ship1_image
-            self.health = 3000
+            self.health = 1250
             self.late_money = 1000
         self.rect = self.image.get_rect()
 
@@ -529,6 +530,7 @@ while keep_going:
                 if high_scores[score_index] <= ships_destroyed:
                     high_scores.insert(score_index, ships_destroyed)
                     done = True
+                    score_achieved_index = score_index
                     break
             if not done:
                 high_scores.append(ships_destroyed)
@@ -605,8 +607,13 @@ while keep_going:
         screen.blit(game_over_border, (30, 32))
         screen.blit(game_over_surface, (31, 33))
         screen.blit(highscore_text, (34, 35))
-        screen.blit(font.render("Rank:               Score", True, black), (200, 200))
+        rank_text = font.render("Rank".ljust(20) + "Score", True, black)
+        screen.blit(rank_text, (200, 200))
         for score_index in range(0, len(high_scores[0:10])):
-            screen.blit(font.render(str(score_index + 1).center(2) + ":               " + str(high_scores[score_index]), True, black), (200, 235 + 35*score_index))
+            if score_index == score_achieved_index:
+                rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, red)
+            else:
+                rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
+            screen.blit(rank_text, (200, 235 + 35*score_index))
 
     pygame.display.flip()
