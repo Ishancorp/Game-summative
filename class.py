@@ -56,12 +56,16 @@ missile_surface = pygame.Surface((120, bottom_bounds)).convert()
 seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
 pause_surface = pygame.Surface((120, bottom_bounds)).convert()
 
-blue_surface = pygame.Surface((1015, 768)).convert()
+blue_surface = pygame.Surface(screen.get_size()).convert()
 blue_surface.fill(blue)
+border_play = pygame.Surface((302, 102)).convert()
+border_play.fill(dark_gray)
 play_surface = pygame.Surface((300, 100)).convert()
 play_surface.fill(light_gray)
-settings_surface = pygame.Surface((300, 100)).convert()
-settings_surface.fill(light_gray)
+game_over_border = pygame.Surface((952, 702)).convert()
+game_over_border.fill(dark_gray)
+game_over_surface = pygame.Surface((950, 700)).convert()
+game_over_surface.fill(light_gray)
 
 yes_music_surface = pygame.Surface((50, 50)).convert()
 yes_music_surface.fill(green)
@@ -78,14 +82,14 @@ back_button_border_surface.fill(black)
 # fonts and text on the top of the game
 font = pygame.font.SysFont("arial", 14)
 splash_font = pygame.font.SysFont("helvetica", 80)
-title_font = pygame.font.SysFont("helvetica", 125)
+title_font = pygame.font.SysFont("helvetica", 117)
 
-tank_text = font.render("Tank", True, black)
-tank_cost = font.render("$1 000", True, black)
-missile_text = font.render("Missile Launcher", True, black)
-missile_cost = font.render("$10 000", True, black)
-mine_text = font.render("Sea Mine", True, black)
-mine_cost = font.render("$50 000", True, black)
+tank_text = font.render("Tank".center(18), True, black)
+tank_cost = font.render("$1000".center(18), True, black)
+missile_text = font.render("Missile Launcher".center(18), True, black)
+missile_cost = font.render("$10000".center(18), True, black)
+mine_text = font.render("Sea Mine".center(18), True, black)
+mine_cost = font.render("$50000".center(18), True, black)
 paused = font.render("", True, black)
 
 play_text = splash_font.render("Play".center(11), True, black)
@@ -96,11 +100,11 @@ music_title = splash_font.render("Music Settings: ", True, black)
 yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 return_home = font.render("Back", True, black)
-
-go_back_home = font.render("Back", True, black)
+go_back_home = font.render("Back".center(18), True, black)
+highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
-money = 100000
+money = 50000
 chances = 3
 pause = True
 ships_destroyed = 0
@@ -108,6 +112,7 @@ ships_remaining = 0
 tank_pressed = True
 missile_pressed = False
 seamine_pressed = False
+wave_interval = 800
 
 
 tank_price = 1000
@@ -121,6 +126,8 @@ angle = 0
 
 splash_screen = True
 settings_screen = False
+game_over = False
+score_achieved_index = 11
 
 
 class Rocket(pygame.sprite.Sprite):
@@ -144,7 +151,7 @@ class Rocket(pygame.sprite.Sprite):
         for enemy in ship_group:
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
-                enemy.health -= 5
+                enemy.health -= 4
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
             self.active = False
 
@@ -167,7 +174,7 @@ class Mine(pygame.sprite.Sprite):
         for enemy in ship_group:
             if (enemy.x+enemy.image.get_size()[0] >= self.x >= enemy.x or enemy.x+enemy.image.get_size()[0] >= self.x + mine_image.get_size()[1] >= enemy.x) and (enemy.y+enemy.image.get_size()[1] >= self.y >= enemy.y or enemy.y+enemy.image.get_size()[1] >= self.y + mine_image.get_size()[1] >= enemy.y):
                 self.active = False
-                enemy.health -= 50
+                enemy.health -= 100
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -190,7 +197,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in ship_group:
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
-                enemy.health -= 1
+                enemy.health -= 0.75
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
             self.active = False
 
@@ -241,14 +248,14 @@ class MissileLauncher(pygame.sprite.Sprite):
     def update(self):
         for enemy in ship_group:
             if 500 > self.x-enemy.x > -500 and 500 > self.y-enemy.y > -500:
-                lower = abs(self.y-enemy.y+(enemy.image.get_size()[1]/2))
+                lower = abs(self.y - enemy.y + (enemy.image.get_size()[1]/2))
                 if lower == 0:
                     lower = 10**100
-                self.angle = math.atan((self.x-abs(enemy.x))/lower)
+                self.angle = math.atan((self.x-abs(enemy.x + (enemy.image.get_size()[0]/2)))/lower)
                 if self.y < enemy.y:
                     self.angle = 135-self.angle
                 self.timer += 1
-                if self.timer == 10:
+                if self.timer == 30:
                     bullet_group.add(Rocket(self.x+(1.25*missile_image.get_size()[0]/7), self.y, self.angle))
                     bullet_group.add(Rocket(self.x+(1.1*missile_image.get_size()[0]/3), self.y, self.angle))
                     bullet_group.add(Rocket(self.x+(1.625*missile_image.get_size()[0]/3), self.y, self.angle))
@@ -260,16 +267,20 @@ class MissileLauncher(pygame.sprite.Sprite):
 class Ship(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
-        ship_choice = randint(0, 6)
-        if ship_choice == 0:
+        ship_choice = randint(1, 6)
+        print(ship_choice)
+        if ship_choice == 1:
             self.image = ship3_image
-            self.health = 8000
+            self.health = 2000
+            self.late_money = 10000
         elif 2 <= ship_choice <= 3:
             self.image = ship2_image
-            self.health = 5000
+            self.health = 1625
+            self.late_money = 5000
         else:
             self.image = ship1_image
-            self.health = 2000
+            self.health = 1250
+            self.late_money = 1000
         self.rect = self.image.get_rect()
 
         self.dir_x = 0
@@ -280,6 +291,7 @@ class Ship(pygame.sprite.Sprite):
         self.rect.move_ip(self.x, self.y)
         self.active = True
         self.money = 0
+        self.victor = False
 
     def update(self):
         self.x = self.rect.left
@@ -289,32 +301,49 @@ class Ship(pygame.sprite.Sprite):
             self.dir_x = 0
         elif self.y == 175:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = 100
-        elif self.y > 175 and self.x < 850:
+            self.dir_y = 110
+        elif 300 > self.y > 175 and self.x < 850:
             self.dir_y = 0
             self.dir_x = 1
-        elif self.x == 851:
+        elif self.x == 850 and self.y < 330:
             self.image = pygame.transform.rotate(self.image, -90)
-            self.dir_y = -100
-        elif 850 < self.rect.left:
+            self.dir_x = 110
+        elif self.x > 850 and self.y < 390:
             self.dir_y = 1
             self.dir_x = 0
-        elif (385 < self.rect.top < 500) and 990 < self.rect.left:
-            self.dir_y = 0
+        elif self.y == 392:
+            self.image = pygame.transform.rotate(self.image, 90)
+            self.dir_y = 120
+        elif 395 < self.y < 600 and self.x > 100:
             self.dir_x = -1
-        elif 100 > self.rect.left and 300 < self.rect.top < 500:
+            self.dir_y = 0
+        elif self.x == 100 and 600 > self.y > 395:
+            self.image = pygame.transform.rotate(self.image, -90)
+            self.dir_x = -50
+        elif self.x < 100 and 395 <= self.y < 600:
+            self.dir_x = 0
             self.dir_y = 1
-            self.dir_x = 0
-        elif self.rect.top > 550 and 990 > self.rect.left:
-            self.dir_y = 0
+        elif self.x < 100 and self.y == 600:
+            self.image = pygame.transform.rotate(self.image, 90)
+            self.dir_y = 65
+        elif self.y > 600 and self.x < 700:
             self.dir_x = 1
-        elif self.rect.top > 550 and 800 < self.rect.left:
             self.dir_y = 0
+        elif self.y > 600 and self.x == 700:
+            self.image = pygame.transform.rotate(self.image, -90)
+            self.dir_y = -30
+        elif self.y > 600 and self.x > 700:
             self.dir_x = 0
+            self.dir_y = 1
+
         self.rect.move_ip(self.speed * self.dir_x, self.speed * self.dir_y)
         if self.health <= 0:
             self.active = False
-            self.money = 10000
+            self.money = self.late_money
+
+        if self.y > screen.get_size()[1]:
+            self.active = False
+            self.victor = True
 
 
 ship_group = pygame.sprite.Group()
@@ -337,13 +366,12 @@ while keep_going:
                     print("play")
                     splash_screen = False
                     pause = False
-                    ship_spawns = 199
+                    ship_spawns = wave_interval - 1
                 elif (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 + 100 < y < blue_surface.get_size()[1] / 2 + 200):
                     settings_screen = True
                     splash_screen = False
                     print("settings")
             elif settings_screen:
-                print(x, y)
                 if (160 < x < 300) and (320 < y < 435):
                     music = True
                 elif (160 < x < 300) and (470 < y < 535):
@@ -352,6 +380,8 @@ while keep_going:
                     splash_screen = True
                     pause = True
                     settings_screen = False
+            elif game_over:
+                pass
             else:
                 y_clicked = 142 > y > 9
 
@@ -408,10 +438,13 @@ while keep_going:
                         else:
                             break
 
-    ship_spawns += 1
-    if ship_spawns == 200:
-        ship_group.add(Ship(100 + randint(-20, 20), 0))
-        ship_spawns = 0
+    if not pause:
+        ship_spawns += 1
+        if ship_spawns == wave_interval or len(ship_group) == 0:
+            ship_group.add(Ship(100 + randint(-40, 40), 0))
+            ship_spawns = 0
+            wave_interval *= 0.95
+            wave_interval = int(wave_interval)
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
@@ -433,10 +466,10 @@ while keep_going:
 
     if pause:
         pause_surface.fill(red)
-        paused = "Paused".center(7)
+        paused = "Paused".center(18)
     else:
         pause_surface.fill(green)
-        paused = "Resumed".center(7)
+        paused = "Resumed".center(18)
 
     screen.blit(back, (0, 173))
     if not pause:
@@ -449,7 +482,7 @@ while keep_going:
     islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
     chance_text = font.render("Chances: "+str(chances), True, black)
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
-    shipsremaining_text = font.render("Ships Remaining: "+str(ships_remaining), True, black)
+    shipsremaining_text = font.render("Ships Remaining: "+str(len(ship_group)), True, black)
     paused_text = font.render(paused, True, black)
 
     # Blitting
@@ -466,9 +499,48 @@ while keep_going:
     for ship in ship_group.sprites():
         if ship.active:
             screen.blit(ship.image, (ship.x, ship.y))
+        elif ship.victor:
+            ship_group.remove(ship)
+            chances -= 1
         else:
             ship_group.remove(ship)
             money += ship.money
+            ships_destroyed += 1
+
+    if chances == 0:
+        pause = True
+        player_group.empty()
+        ship_group.empty()
+        bullet_group.empty()
+        game_over = True
+        high_scores = []
+        with open("highscores.txt", "r") as file:
+            for line in file:
+                try:
+                    int(line)
+                except:
+                    continue
+                else:
+                    high_scores.append(int(line))
+        done = False
+        if len(high_scores) == 0:
+            high_scores.append(ships_destroyed)
+        else:
+            for score_index in range(0, len(high_scores)):
+                if high_scores[score_index] <= ships_destroyed:
+                    high_scores.insert(score_index, ships_destroyed)
+                    done = True
+                    score_achieved_index = score_index
+                    break
+            if not done:
+                high_scores.append(ships_destroyed)
+        with open("highscores.txt", "w") as file:
+            for score in high_scores[0:10]:
+                file.write(str(score)+chr(10))
+                chances = 3
+        print(high_scores[0:10])
+        game_over = True
+        print(len(high_scores))
 
     # blitting the top part of the screen
     top_bounds = 10
@@ -479,14 +551,14 @@ while keep_going:
     screen.blit(missile_surface, (140, top_bounds))
     screen.blit(border, (269, top_bounds - 1))
     screen.blit(seamine_surface, (270, top_bounds))
-    screen.blit(main_border, (704, top_bounds - 1))
-    screen.blit(display, (705, top_bounds))
+    screen.blit(main_border, (679, top_bounds - 1))
+    screen.blit(display, (680, top_bounds))
     screen.blit(border, (399, top_bounds - 1))
     screen.blit(pause_surface, (400, top_bounds))
 
-    scale = 150
+    scale = 125
     top_bounds = 100
-    screen.blit(paused_text, (408, 50))
+    screen.blit(paused_text, (408, 70))
     screen.blit(islandsdestroyed_text, (400 + scale + 200, top_bounds + 15))
     screen.blit(shipsdestroyed_text, (400 + scale + 200, top_bounds - 25))
     screen.blit(money_text, (400 + scale + 200, top_bounds - 65))
@@ -495,16 +567,16 @@ while keep_going:
     screen.blit(chance_text, (650 + scale + 100, top_bounds + 15))
 
     scale = 50
-    screen.blit(tank_text, (scale, top_bounds))
-    screen.blit(missile_text, (110 + scale, top_bounds))
-    screen.blit(mine_text, (250 + scale, top_bounds))
-    screen.blit(tank_cost, (scale, top_bounds + 15))
-    screen.blit(missile_cost, (scale + 110, top_bounds + 15))
-    screen.blit(mine_cost, (250 + scale, top_bounds + 15))
+    screen.blit(tank_text, (10, top_bounds))
+    screen.blit(missile_text, (143, top_bounds))
+    screen.blit(mine_text, (270, top_bounds))
+    screen.blit(tank_cost, (10, top_bounds + 15))
+    screen.blit(missile_cost, (140, top_bounds + 15))
+    screen.blit(mine_cost, (270, top_bounds + 15))
 
     screen.blit(back_button_border_surface, (529, top_bounds - 91))
     screen.blit(back_button_surface, (530, top_bounds - 90))
-    screen.blit(go_back_home, (535, top_bounds - 45))
+    screen.blit(go_back_home, (535, 70))
 
     screen.blit(tank_image, (scale + 3, 50))
     screen.blit(missile_image, (scale + 98, 50))
@@ -512,11 +584,13 @@ while keep_going:
 
     if splash_screen:
         screen.blit(blue_surface, (0, 0))
+        screen.blit(border_play, (blue_surface.get_size()[0] / 3 - 1, blue_surface.get_size()[1] / 2 - 101))
+        screen.blit(border_play, (blue_surface.get_size()[0] / 3 - 1, blue_surface.get_size()[1] / 2 + 99))
         screen.blit(play_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 100))
-        screen.blit(settings_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
-        screen.blit(title_text, (blue_surface.get_size()[0] / 15, blue_surface.get_size()[1] / 2 - 300))
-        screen.blit(play_text, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 100))
-        screen.blit(settings_text, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
+        screen.blit(play_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
+        screen.blit(title_text, (0, blue_surface.get_size()[1] / 2 - 300))
+        screen.blit(play_text, (blue_surface.get_size()[0] / 3-34, blue_surface.get_size()[1] / 2 - 100))
+        screen.blit(settings_text, (blue_surface.get_size()[0] / 3-34, blue_surface.get_size()[1] / 2 + 100))
 
     if settings_screen:
         screen.blit(blue_surface, (0, 0))
@@ -527,4 +601,19 @@ while keep_going:
         screen.blit(no_music_surface, (180, 483))
         screen.blit(return_home_surface, (0, 0))
         screen.blit(return_home, (100, 50))
+
+    if game_over:
+        screen.blit(blue_surface, (0, 0))
+        screen.blit(game_over_border, (30, 32))
+        screen.blit(game_over_surface, (31, 33))
+        screen.blit(highscore_text, (34, 35))
+        rank_text = font.render("Rank".ljust(20) + "Score", True, black)
+        screen.blit(rank_text, (200, 200))
+        for score_index in range(0, len(high_scores[0:10])):
+            if score_index == score_achieved_index:
+                rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, red)
+            else:
+                rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
+            screen.blit(rank_text, (200, 235 + 35*score_index))
+
     pygame.display.flip()
