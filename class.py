@@ -100,7 +100,7 @@ music_title = splash_font.render("Music Settings: ", True, black)
 yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 return_home = font.render("Back", True, black)
-go_back_home = font.render("Back".center(18), True, black)
+go_back_home = font.render("Quit".center(18), True, black)
 highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
@@ -197,7 +197,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in ship_group:
             if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
                 self.active = False
-                enemy.health -= 0.75
+                enemy.health -= 1/3
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
             self.active = False
 
@@ -286,7 +286,7 @@ class Ship(pygame.sprite.Sprite):
         self.dir_x = 0
         self.dir_y = 0
         self.x = x_pos
-        self.y = y_pos
+        self.y = y_pos - self.image.get_size()[1]
         self.speed = 1
         self.rect.move_ip(self.x, self.y)
         self.active = True
@@ -306,7 +306,7 @@ class Ship(pygame.sprite.Sprite):
             self.dir_y = 0
             self.dir_x = 1
         elif self.x == 850 and self.y < 330:
-            self.image = pygame.transform.rotate(self.image, -90)
+            self.image = pygame.transform.rotate(self.image, 90)
             self.dir_x = 110
         elif self.x > 850 and self.y < 390:
             self.dir_y = 1
@@ -318,7 +318,7 @@ class Ship(pygame.sprite.Sprite):
             self.dir_x = -1
             self.dir_y = 0
         elif self.x == 100 and 600 > self.y > 395:
-            self.image = pygame.transform.rotate(self.image, -90)
+            self.image = pygame.transform.rotate(self.image, 90)
             self.dir_x = -50
         elif self.x < 100 and 395 <= self.y < 600:
             self.dir_x = 0
@@ -330,7 +330,7 @@ class Ship(pygame.sprite.Sprite):
             self.dir_x = 1
             self.dir_y = 0
         elif self.y > 600 and self.x == 700:
-            self.image = pygame.transform.rotate(self.image, -90)
+            self.image = pygame.transform.rotate(self.image, 90)
             self.dir_y = -30
         elif self.y > 600 and self.x > 700:
             self.dir_x = 0
@@ -441,9 +441,9 @@ while keep_going:
     if not pause:
         ship_spawns += 1
         if ship_spawns == wave_interval or len(ship_group) == 0:
-            ship_group.add(Ship(100 + randint(-40, 40), 0))
+            ship_group.add(Ship(100, 173))
             ship_spawns = 0
-            wave_interval *= 0.95
+            wave_interval *= 0.9
             wave_interval = int(wave_interval)
     if not tank_pressed:
         tank_surface.fill(gray)
