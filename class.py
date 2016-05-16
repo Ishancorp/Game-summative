@@ -21,16 +21,20 @@ back = pygame.image.load("Game initial sketch.png").convert_alpha()  # the backg
 tank_image = pygame.image.load("Tank.gif").convert_alpha()
 missile_image = pygame.image.load("missile.png").convert_alpha()
 mine_image = pygame.image.load("Army mine.png").convert_alpha()
-bullet_image = pygame.image.load("projectile.png").convert_alpha()
+bullet_image = pygame.image.load("projectile.gif").convert_alpha()
 ship1_image = pygame.image.load("Army Ship Level 1.gif").convert_alpha()
 ship2_image = pygame.image.load("Army Ship Level 2.gif").convert_alpha()
 ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
 rocket_image = pygame.image.load("rocket.gif").convert_alpha()
+splash = pygame.image.load("Splash screen.jpg").convert_alpha()
+settings = pygame.image.load("Settings Screen.jpg").convert_alpha()
 
-# Setting up some colours
 dark_gray = (75, 75, 75)
+white = (255, 255, 255)
 pressed = (0, 100, 0)
 green = (0, 200, 0)
+dark_green = (0, 255, 0)
+dark_brown = (255, 0, 0)
 gray = (200, 200, 200)
 light_gray = (242, 242, 242)
 black = (0, 0, 0)
@@ -104,7 +108,7 @@ go_back_home = font.render("Quit".center(18), True, black)
 highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
-money = 50000
+money = 5000000000
 chances = 3
 pause = True
 ships_destroyed = 0
@@ -142,6 +146,7 @@ class Rocket(pygame.sprite.Sprite):
         self.dir_y = -16*math.cos(self.angle)
         self.rect.move_ip(self.x, self.y)
         self.active = True
+        self.money = 5
 
     def update(self):
         self.image = pygame.transform.rotate(rocket_image, math.radians(self.angle))
@@ -149,7 +154,7 @@ class Rocket(pygame.sprite.Sprite):
         self.x = self.rect.left
         self.y = self.rect.top
         for enemy in ship_group:
-            if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
+            if self.rect.colliderect(enemy.rect):
                 self.active = False
                 enemy.health -= 4
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -172,9 +177,9 @@ class Mine(pygame.sprite.Sprite):
         self.x = self.rect.left
         self.y = self.rect.top
         for enemy in ship_group:
-            if (enemy.x+enemy.image.get_size()[0] >= self.x >= enemy.x or enemy.x+enemy.image.get_size()[0] >= self.x + mine_image.get_size()[1] >= enemy.x) and (enemy.y+enemy.image.get_size()[1] >= self.y >= enemy.y or enemy.y+enemy.image.get_size()[1] >= self.y + mine_image.get_size()[1] >= enemy.y):
+            if self.rect.colliderect(enemy.rect):
                 self.active = False
-                enemy.health -= 100
+                enemy.health -= 500
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -182,20 +187,21 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet_image
         self.rect = self.image.get_rect()
-        self.x = x_pos + (tank_image.get_size()[0]/2)
-        self.y = y_pos + (tank_image.get_size()[1]/2)
+        self.x = x_pos
+        self.y = y_pos
         self.angle = angle_tank
         self.dir_x = -8*math.sin(self.angle)
         self.dir_y = -8*math.cos(self.angle)
-        self.rect.move_ip(self.x + (bullet_image.get_size()[0]/2), self.y + (bullet_image.get_size()[1]/2))
+        self.rect.move_ip(self.x, self.y)
         self.active = True
+        self.money = 2
 
     def update(self):
         self.rect.move_ip(self.dir_x, self.dir_y)
         self.x = self.rect.left
         self.y = self.rect.top
         for enemy in ship_group:
-            if enemy.x < self.x < (enemy.x+(enemy.image.get_size()[0])) and enemy.y < self.y < (enemy.y+(enemy.image.get_size()[1])):
+            if self.rect.colliderect(enemy.rect):
                 self.active = False
                 enemy.health -= 1/3
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -227,7 +233,7 @@ class Tank(pygame.sprite.Sprite):
                     self.angle = 135-self.angle
                 self.timer += 1
                 if self.timer == 5:
-                    bullet_group.add(Bullet(self.x, self.y, self.angle))
+                    bullet_group.add(Bullet(self.x + (tank_image.get_size()[0]/2), self.y + (tank_image.get_size()[1]/2), self.angle))
                     self.timer = 0
                 self.image = pygame.transform.rotate(tank_image, math.degrees(self.angle))
                 break
@@ -335,6 +341,8 @@ class Ship(pygame.sprite.Sprite):
         elif self.y > 600 and self.x > 700:
             self.dir_x = 0
             self.dir_y = 1
+        self.rect = self.image.get_rect()
+        self.rect.move_ip(self.x, self.y)
 
         self.rect.move_ip(self.speed * self.dir_x, self.speed * self.dir_y)
         if self.health <= 0:
@@ -362,16 +370,16 @@ while keep_going:
             x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
             y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
             if splash_screen:
-                if (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 - 100 < y < blue_surface.get_size()[1] / 2):
+                if (380 < x < 640) and (480 < y < 570):
                     print("play")
                     splash_screen = False
                     pause = False
-                    ship_spawns = wave_interval - 1
-                elif (blue_surface.get_size()[0] / 3 < x < blue_surface.get_size()[0] / 3 + 300) and (blue_surface.get_size()[1] / 2 + 100 < y < blue_surface.get_size()[1] / 2 + 200):
+                elif (300 < x < 750) and (590 < y < 680):
                     settings_screen = True
                     splash_screen = False
                     print("settings")
             elif settings_screen:
+                print(x, y)
                 if (160 < x < 300) and (320 < y < 435):
                     music = True
                 elif (160 < x < 300) and (470 < y < 535):
@@ -419,7 +427,7 @@ while keep_going:
                     overlap = False
 
                     for player in player_group.sprites():
-                        if (x == player.x and y == player.y) or (missile_pressed and player.type == "M" and (player.x-70 <= x <= player.x+70 and y == player.y)):
+                        if (x == player.x and y == player.y) or (missile_pressed and player.x - 70 <= x <= player.x) or (player.type == "M" and (player.x <= x <= player.x + 70 and y == player.y)):
                             overlap = True
 
                     if not overlap:
@@ -496,6 +504,7 @@ while keep_going:
             screen.blit(projectile.image, (projectile.x, projectile.y))
         else:
             bullet_group.remove(projectile)
+            money += projectile.money
     for ship in ship_group.sprites():
         if ship.active:
             screen.blit(ship.image, (ship.x, ship.y))
@@ -583,24 +592,10 @@ while keep_going:
     screen.blit(mine_image, (scale + 260, 50))
 
     if splash_screen:
-        screen.blit(blue_surface, (0, 0))
-        screen.blit(border_play, (blue_surface.get_size()[0] / 3 - 1, blue_surface.get_size()[1] / 2 - 101))
-        screen.blit(border_play, (blue_surface.get_size()[0] / 3 - 1, blue_surface.get_size()[1] / 2 + 99))
-        screen.blit(play_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 100))
-        screen.blit(play_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
-        screen.blit(title_text, (0, blue_surface.get_size()[1] / 2 - 300))
-        screen.blit(play_text, (blue_surface.get_size()[0] / 3-34, blue_surface.get_size()[1] / 2 - 100))
-        screen.blit(settings_text, (blue_surface.get_size()[0] / 3-34, blue_surface.get_size()[1] / 2 + 100))
+        screen.blit(splash, (0, 0))
 
     if settings_screen:
-        screen.blit(blue_surface, (0, 0))
-        screen.blit(music_title, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 200))
-        screen.blit(yes_music, (235, 400))
-        screen.blit(no_music, (235, 500))
-        screen.blit(yes_music_surface, (180, 383))
-        screen.blit(no_music_surface, (180, 483))
-        screen.blit(return_home_surface, (0, 0))
-        screen.blit(return_home, (100, 50))
+        screen.blit(settings, (0, 0))
 
     if game_over:
         screen.blit(blue_surface, (0, 0))
