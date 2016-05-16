@@ -56,12 +56,16 @@ missile_surface = pygame.Surface((120, bottom_bounds)).convert()
 seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
 pause_surface = pygame.Surface((120, bottom_bounds)).convert()
 
-blue_surface = pygame.Surface((1015, 768)).convert()
+blue_surface = pygame.Surface(screen.get_size()).convert()
 blue_surface.fill(blue)
+border_play = pygame.Surface((302, 102)).convert()
+border_play.fill(dark_gray)
 play_surface = pygame.Surface((300, 100)).convert()
 play_surface.fill(light_gray)
-settings_surface = pygame.Surface((300, 100)).convert()
-settings_surface.fill(light_gray)
+game_over_border = pygame.Surface((952, 702)).convert()
+game_over_border.fill(dark_gray)
+game_over_surface = pygame.Surface((950, 700)).convert()
+game_over_surface.fill(light_gray)
 
 yes_music_surface = pygame.Surface((50, 50)).convert()
 yes_music_surface.fill(green)
@@ -96,14 +100,14 @@ music_title = splash_font.render("Music Settings: ", True, black)
 yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 return_home = font.render("Back", True, black)
-
 go_back_home = font.render("Back".center(18), True, black)
+highscore_text = title_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
 money = 50000
-chances = 3
+chances = 0
 pause = True
-ships_destroyed = 18
+ships_destroyed = 15
 ships_remaining = 0
 tank_pressed = True
 missile_pressed = False
@@ -375,6 +379,8 @@ while keep_going:
                     splash_screen = True
                     pause = True
                     settings_screen = False
+            elif game_over:
+                pass
             else:
                 y_clicked = 142 > y > 9
 
@@ -527,10 +533,13 @@ while keep_going:
             if not done:
                 high_scores.append(ships_destroyed)
         with open("highscores.txt", "w") as file:
-            for score in high_scores:
+            for score in high_scores[0:10]:
                 file.write(str(score)+chr(10))
                 chances = 3
-        print(high_scores)
+        print(high_scores[0:10])
+        game_over = True
+        print(len(high_scores))
+
     # blitting the top part of the screen
     top_bounds = 10
     screen.blit(white_surface, (0, 0))
@@ -573,8 +582,10 @@ while keep_going:
 
     if splash_screen:
         screen.blit(blue_surface, (0, 0))
+        screen.blit(border_play, (blue_surface.get_size()[0] / 3 - 1, blue_surface.get_size()[1] / 2 - 101))
+        screen.blit(border_play, (blue_surface.get_size()[0] / 3 - 1, blue_surface.get_size()[1] / 2 + 99))
         screen.blit(play_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 - 100))
-        screen.blit(settings_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
+        screen.blit(play_surface, (blue_surface.get_size()[0] / 3, blue_surface.get_size()[1] / 2 + 100))
         screen.blit(title_text, (0, blue_surface.get_size()[1] / 2 - 300))
         screen.blit(play_text, (blue_surface.get_size()[0] / 3-34, blue_surface.get_size()[1] / 2 - 100))
         screen.blit(settings_text, (blue_surface.get_size()[0] / 3-34, blue_surface.get_size()[1] / 2 + 100))
@@ -588,4 +599,14 @@ while keep_going:
         screen.blit(no_music_surface, (180, 483))
         screen.blit(return_home_surface, (0, 0))
         screen.blit(return_home, (100, 50))
+
+    if game_over:
+        screen.blit(blue_surface, (0, 0))
+        screen.blit(game_over_border, (30, 32))
+        screen.blit(game_over_surface, (31, 33))
+        screen.blit(highscore_text, (34, 35))
+        screen.blit(font.render("Rank:               Score", True, black), (200, 200))
+        for score_index in range(0, len(high_scores[0:10])):
+            screen.blit(font.render(str(score_index + 1).center(2) + ":               " + str(high_scores[score_index]), True, black), (200, 235 + 35*score_index))
+
     pygame.display.flip()
