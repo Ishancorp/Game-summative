@@ -21,18 +21,20 @@ screen = pygame.display.set_mode((1015, 697))
 
 back = pygame.image.load("Game Initial Sketch.png").convert_alpha()  # the background pic needs to be 1015x595 px.
 tank_image = pygame.image.load("Tank.gif").convert_alpha()
-missile_image = pygame.image.load("Missle Launcher.png").convert_alpha()
+missile_image = pygame.image.load("Missile Launcher.png").convert_alpha()
 mine_image = pygame.image.load("Sea mine.png").convert_alpha()
 bullet_image = pygame.image.load("projectile.gif").convert_alpha()
 ship_image = pygame.image.load("Army Ship Level 1.gif").convert_alpha()
 rocket_image = pygame.image.load("Army Rocket.gif").convert_alpha()
-splash = pygame.image.load("Splash_Screen.jpg").convert_alpha()
+splash = pygame.image.load("Splash screen.jpg").convert_alpha()
 settings = pygame.image.load("Settings_Screen.jpg").convert_alpha()
 
 dark_gray = (75, 75, 75)
 white = (255, 255, 255)
 pressed = (0, 100, 0)
 green = (0, 200, 0)
+dark_green = (0, 255, 0)
+dark_brown = (255, 0, 0)
 gray = (200, 200, 200)
 light_gray = (242, 242, 242)
 black = (0, 0, 0)
@@ -131,6 +133,7 @@ rotate = False
 splash_screen = True
 settings_screen = False
 
+
 class Rocket(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, angle_missile):
         pygame.sprite.Sprite.__init__(self)
@@ -192,7 +195,6 @@ class Bullet(pygame.sprite.Sprite):
         self.dir_y = -8*math.cos(self.angle)
         self.rect.move_ip(self.x + (bullet_image.get_size()[0]/2), self.y + (bullet_image.get_size()[1]/2))
         self.active = True
-
 
     def update(self):
         self.rect.move_ip(self.dir_x, self.dir_y)
@@ -441,11 +443,11 @@ while keep_going:
                             break
 
     if music:
-        yes_music_surface.fill(green)
-        no_music_surface.fill(light_gray)
+        yes_music_surface.fill(dark_green)
+        no_music_surface.fill(dark_brown)
     elif not music:
-        yes_music_surface.fill(light_gray)
-        no_music_surface.fill(green)
+        yes_music_surface.fill(dark_brown)
+        no_music_surface.fill(dark_green)
     if pause:
         pause_surface.fill(red)
         paused = font.render("Play", True, black)
@@ -524,55 +526,55 @@ while keep_going:
 
     # blitting the top part of the screen
     top_bounds = 10
-    screen.blit (white_surface, (0, 0))
-    screen.blit (border, (9, top_bounds - 1))
-    screen.blit (tank_surface, (10, top_bounds))
-    screen.blit (border, (139, top_bounds - 1))
-    screen.blit (missile_surface, (140, top_bounds))
-    screen.blit (border, (269, top_bounds - 1))
-    screen.blit (seamine_surface, (270, top_bounds))
-    screen.blit (main_border, (704, top_bounds - 1))
-    screen.blit (display, (705, top_bounds))
-    screen.blit (border, (399, top_bounds - 1))
-    screen.blit (pause_surface, (400, top_bounds))
+    screen.blit(white_surface, (0, 0))
+    screen.blit(border, (9, top_bounds - 1))
+    screen.blit(tank_surface, (10, top_bounds))
+    screen.blit(border, (139, top_bounds - 1))
+    screen.blit(missile_surface, (140, top_bounds))
+    screen.blit(border, (269, top_bounds - 1))
+    screen.blit(seamine_surface, (270, top_bounds))
+    screen.blit(main_border, (704, top_bounds - 1))
+    screen.blit(display, (705, top_bounds))
+    screen.blit(border, (399, top_bounds - 1))
+    screen.blit(pause_surface, (400, top_bounds))
 
     scale = 150
     top_bounds = 100
-    screen.blit (paused, (408, 50))
-    screen.blit (islandsdestroyed_text, (400 + scale + 200, top_bounds + 15))
-    screen.blit (shipsdestroyed_text, (400 + scale + 200, top_bounds - 25))
-    screen.blit (money_text, (400 + scale + 200, top_bounds - 65))
-    screen.blit (shipsremaining_text, (650 + scale + 100, top_bounds - 25))
-    screen.blit (numweapons_text, (650 + scale + 100, top_bounds - 65))
-    screen.blit (chance_text, (650 + scale + 100, top_bounds + 15))
+    screen.blit(paused, (408, 50))
+    screen.blit(islandsdestroyed_text, (400 + scale + 200, top_bounds + 15))
+    screen.blit(shipsdestroyed_text, (400 + scale + 200, top_bounds - 25))
+    screen.blit(money_text, (400 + scale + 200, top_bounds - 65))
+    screen.blit(shipsremaining_text, (650 + scale + 100, top_bounds - 25))
+    screen.blit(numweapons_text, (650 + scale + 100, top_bounds - 65))
+    screen.blit(chance_text, (650 + scale + 100, top_bounds + 15))
 
     scale = 50
-    screen.blit (tank_text, (scale, top_bounds))
-    screen.blit (missile_text, (110 + scale, top_bounds))
-    screen.blit (mine_text, (250 + scale, top_bounds))
-    screen.blit (tank_cost, (scale, top_bounds + 15))
-    screen.blit (missile_cost, (scale + 110, top_bounds + 15))
-    screen.blit (mine_cost, (250 + scale, top_bounds + 15))
+    screen.blit(tank_text, (scale, top_bounds))
+    screen.blit(missile_text, (110 + scale, top_bounds))
+    screen.blit(mine_text, (250 + scale, top_bounds))
+    screen.blit(tank_cost, (scale, top_bounds + 15))
+    screen.blit(missile_cost, (scale + 110, top_bounds + 15))
+    screen.blit(mine_cost, (250 + scale, top_bounds + 15))
 
-    screen.blit (back_button_border_surface, (529, top_bounds - 91))
-    screen.blit (back_button_surface, (530, top_bounds - 90))
-    screen.blit (go_back_home, (535, top_bounds - 45))
+    screen.blit(back_button_border_surface, (529, top_bounds - 91))
+    screen.blit(back_button_surface, (530, top_bounds - 90))
+    screen.blit(go_back_home, (535, top_bounds - 45))
 
-    screen.blit (tank_image, (scale + 3, 50))
-    screen.blit (missile_image, (scale + 98, 50))
-    screen.blit (mine_image, (scale + 260, 50))
+    screen.blit(tank_image, (scale + 3, 50))
+    screen.blit(missile_image, (scale + 98, 50))
+    screen.blit(mine_image, (scale + 260, 50))
 
     if splash_screen:
         screen.blit(splash, (0, 0))
 
     if settings_screen:
-        screen.blit (settings, (0, 0))
-        screen.blit (yes_music, (235-50, 400))
-        screen.blit (no_music, (235-50, 500))
-        screen.blit (yes_music_surface, (180, 383))
-        screen.blit (no_music_surface, (180, 483))
+        screen.blit(settings, (0, 0))
+        screen.blit(yes_music, (235, 400))
+        screen.blit(no_music, (235, 500))
+        screen.blit(yes_music_surface, (180, 383))
+        screen.blit(no_music_surface, (180, 483))
 
     if game_lost:
         screen.blit(you_lose_surface, (0, 0))
         screen.blit(you_lose_title, (0, 0))
-    pygame.display.flip ()
+    pygame.display.flip()
