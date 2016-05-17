@@ -113,7 +113,7 @@ highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
 money = 50000
-chances = 3
+chances = 0
 pause = True
 ships_destroyed = 0
 ships_remaining = 0
@@ -182,7 +182,7 @@ class Mine(pygame.sprite.Sprite):
         for enemy in ship_group:
             if self.rect.colliderect(enemy.rect):
                 self.active = False
-                enemy.health -= 500
+                enemy.health = 0
 
 
 class Bullet(pygame.sprite.Sprite):
