@@ -21,7 +21,7 @@ back = pygame.image.load("Game initial sketch.png").convert_alpha()  # the backg
 tank_image = pygame.image.load("Tank.gif").convert_alpha()
 missile_image = pygame.image.load("missile.png").convert_alpha()
 mine_image = pygame.image.load("Army mine.png").convert_alpha()
-bullet_image = pygame.image.load("projectile.gif").convert_alpha()
+bullet_image = pygame.image.load("projectile.png").convert_alpha()
 ship1_image = pygame.image.load("Army Ship Level 1.gif").convert_alpha()
 ship2_image = pygame.image.load("Army Ship Level 2.gif").convert_alpha()
 ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
@@ -48,9 +48,9 @@ dark_blue = (100, 100, 200)
 bottom_bounds = 155
 border = pygame.Surface((122, bottom_bounds + 2)).convert()
 border.fill(dark_gray)
-main_border = pygame.Surface((307, bottom_bounds + 2)).convert()
+main_border = pygame.Surface((327, bottom_bounds + 2)).convert()
 main_border.fill(dark_gray)
-display = pygame.Surface((305, bottom_bounds)).convert()
+display = pygame.Surface((325, bottom_bounds)).convert()
 display.fill(gray)
 white_surface = pygame.Surface((1015, 173)).convert()
 white_surface.fill((255, 255, 255))
@@ -83,17 +83,21 @@ back_button_surface.fill(dark_blue)
 back_button_border_surface = pygame.Surface((122, bottom_bounds + 2)).convert()
 back_button_border_surface.fill(black)
 
+tank_price = 1000
+mine_price = 50000
+missile_price = 10000
+
 # fonts and text on the top of the game
 font = pygame.font.SysFont("arial", 14)
 splash_font = pygame.font.SysFont("helvetica", 80)
 title_font = pygame.font.SysFont("helvetica", 117)
 
 tank_text = font.render("Tank".center(18), True, black)
-tank_cost = font.render("$1000".center(18), True, black)
+tank_cost = font.render(("$"+str(tank_price)).center(18), True, black)
 missile_text = font.render("Missile Launcher".center(18), True, black)
-missile_cost = font.render("$10000".center(18), True, black)
+missile_cost = font.render(("$"+str(missile_price)).center(18), True, black)
 mine_text = font.render("Sea Mine".center(18), True, black)
-mine_cost = font.render("$50000".center(18), True, black)
+mine_cost = font.render(("$"+str(mine_price)).center(18), True, black)
 paused = font.render("", True, black)
 
 play_text = splash_font.render("Play".center(11), True, black)
@@ -108,7 +112,7 @@ go_back_home = font.render("Quit".center(18), True, black)
 highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
-money = 5000000000
+money = 50000
 chances = 3
 pause = True
 ships_destroyed = 0
@@ -119,9 +123,6 @@ seamine_pressed = False
 wave_interval = 800
 
 
-tank_price = 1000
-mine_price = 50000
-missile_price = 10000
 ship_spawns = 0
 
 # variables relating to tank
@@ -132,6 +133,7 @@ splash_screen = True
 settings_screen = False
 game_over = False
 score_achieved_index = 11
+level = 1
 
 
 class Rocket(pygame.sprite.Sprite):
@@ -146,10 +148,10 @@ class Rocket(pygame.sprite.Sprite):
         self.dir_y = -16*math.cos(self.angle)
         self.rect.move_ip(self.x, self.y)
         self.active = True
-        self.money = 5
+        self.money = 15
 
     def update(self):
-        self.image = pygame.transform.rotate(rocket_image, math.radians(self.angle))
+        self.image = pygame.transform.rotate(rocket_image, math.degrees(self.angle))
         self.rect.move_ip(self.dir_x, self.dir_y)
         self.x = self.rect.left
         self.y = self.rect.top
@@ -172,6 +174,7 @@ class Mine(pygame.sprite.Sprite):
         self.rect.move_ip(self.x, self.y)
         self.active = True
         self.type = "S"
+        self.size = self.image.get_size()
 
     def update(self):
         self.x = self.rect.left
@@ -219,7 +222,7 @@ class Tank(pygame.sprite.Sprite):
         self.timer = 0
         self.active = True
         self.type = "T"
-        self.angle_adjust = 0
+        self.size = self.image.get_size()
 
     def update(self):
         for enemy in ship_group:
@@ -250,6 +253,7 @@ class MissileLauncher(pygame.sprite.Sprite):
         self.timer = 0
         self.active = True
         self.type = "M"
+        self.size = self.image.get_size()
 
     def update(self):
         for enemy in ship_group:
@@ -278,15 +282,19 @@ class Ship(pygame.sprite.Sprite):
         if ship_choice == 1:
             self.image = ship3_image
             self.health = 2000
-            self.late_money = 10000
+            self.late_money = 5000
         elif 2 <= ship_choice <= 3:
             self.image = ship2_image
             self.health = 1625
-            self.late_money = 5000
+            self.late_money = 2500
         else:
             self.image = ship1_image
             self.health = 1250
-            self.late_money = 1000
+            self.late_money = 500
+
+        if level == 2:
+            self.health += 500
+            self.late_money += 750
         self.rect = self.image.get_rect()
 
         self.dir_x = 0
@@ -367,54 +375,56 @@ while keep_going:
             keep_going = False
 
         elif ev.type == MOUSEBUTTONDOWN:
-            x = ((ev.pos[0])//35)*35  # getting the x of where the mouse clicked
-            y = ((ev.pos[1])//35)*35  # getting the y of where the mouse clicked
+            x_unadjusted = ev.pos[0]
+            y_unadjusted = ev.pos[1]
+            x = (x_unadjusted//35)*35  # getting the x of where the mouse clicked
+            y = (y_unadjusted//35)*35  # getting the y of where the mouse clicked
             if splash_screen:
-                if (380 < x < 640) and (480 < y < 570):
+                if (380 < x_unadjusted < 640) and (480 < y_unadjusted < 570):
                     print("play")
                     splash_screen = False
                     pause = False
-                elif (300 < x < 750) and (590 < y < 680):
+                elif (300 < x_unadjusted < 750) and (590 < y_unadjusted < 680):
                     settings_screen = True
                     splash_screen = False
                     print("settings")
             elif settings_screen:
-                print(x, y)
-                if (160 < x < 300) and (320 < y < 435):
+                print(x_unadjusted, y_unadjusted)
+                if (160 < x_unadjusted < 300) and (320 < y_unadjusted < 435):
                     music = True
-                elif (160 < x < 300) and (470 < y < 535):
+                elif (160 < x_unadjusted < 300) and (470 < y_unadjusted < 535):
                     music = False
-                elif y < 100:
+                elif y_unadjusted < 100:
                     splash_screen = True
                     pause = True
                     settings_screen = False
             elif game_over:
                 pass
             else:
-                y_clicked = 142 > y > 9
+                y_clicked = 142 > y_unadjusted > 9
 
-                if 131 > x > 9 and y_clicked:  # if the tank part of the menu is pressed
+                if 131 > x_unadjusted > 9 and y_clicked:  # if the tank part of the menu is pressed
                     tank_pressed = True
                     missile_pressed = False
                     seamine_pressed = False
 
-                elif 261 > x > 139 and y_clicked:  # if the missile part of the menu is pressed
+                elif 261 > x_unadjusted > 139 and y_clicked:  # if the missile part of the menu is pressed
                     tank_pressed = False
                     missile_pressed = True
                     seamine_pressed = False
 
-                elif 391 > x > 269 and y_clicked:  # if the sea mine part of the menu is pressed
+                elif 391 > x_unadjusted > 269 and y_clicked:  # if the sea mine part of the menu is pressed
                     tank_pressed = False
                     missile_pressed = False
                     seamine_pressed = True
 
-                elif y_clicked and 400 < x < 520:  # if any other part of the menu is pressed
+                elif y_clicked and 400 < x_unadjusted < 520:  # if any other part of the menu is pressed
                     if pause:  # if the game is already paused
                         pause = False
                     elif not pause:  # if the game is not already paused
                         pause = True
 
-                elif y_clicked and 529 < x < 649:
+                elif y_clicked and 529 < x_unadjusted < 649:
                     splash_screen = True
                     pause = True
                     player_group.empty()
@@ -427,7 +437,7 @@ while keep_going:
                     overlap = False
 
                     for player in player_group.sprites():
-                        if (x == player.x and y == player.y) or (missile_pressed and player.x - 70 <= x <= player.x) or (player.type == "M" and (player.x <= x <= player.x + 70 and y == player.y)):
+                        if player.x-1 <= x <= (player.x + player.size[0]-1) and player.y-1 <= y <= (player.y + player.size[1]-1):
                             overlap = True
 
                     if not overlap:
@@ -451,8 +461,27 @@ while keep_going:
         if ship_spawns == wave_interval or len(ship_group) == 0:
             ship_group.add(Ship(100, 173))
             ship_spawns = 0
-            wave_interval *= 0.9
+            wave_interval *= 0.925
+            if wave_interval < 20:
+                back = pygame.image.load("Game initial sketch 2.png").convert_alpha()
+                tank_price += 500
+                missile_price += 1000
+                mine_price += 75000
+                if level == 2:
+                    game_over = True
+                else:
+                    level = 2
+                    money += 2000
+                    wave_interval = 700
+                    player_group.empty()
+                    ship_group.empty()
+                    bullet_group.empty()
+                    tank_cost = font.render(("$"+str(tank_price)).center(18), True, black)
+                    missile_cost = font.render(("$"+str(missile_price)).center(18), True, black)
+                    mine_cost = font.render(("$"+str(mine_price)).center(18), True, black)
+                    pause = True
             wave_interval = int(wave_interval)
+            print(wave_interval)
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
@@ -479,7 +508,6 @@ while keep_going:
         pause_surface.fill(green)
         paused = "Resumed".center(18)
 
-    screen.blit(back, (0, 173))
     if not pause:
         ship_group.update()
         player_group.update()
@@ -492,8 +520,10 @@ while keep_going:
     shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
     shipsremaining_text = font.render("Ships Remaining: "+str(len(ship_group)), True, black)
     paused_text = font.render(paused, True, black)
+    level_text = font.render("Level "+str(level), True, black)
 
     # Blitting
+    screen.blit(back, (0, 173))
     for player in player_group.sprites():
         if player.active:
             screen.blit(player.image, (player.x, player.y-2))
@@ -574,6 +604,7 @@ while keep_going:
     screen.blit(shipsremaining_text, (650 + scale + 100, top_bounds - 25))
     screen.blit(numweapons_text, (650 + scale + 100, top_bounds - 65))
     screen.blit(chance_text, (650 + scale + 100, top_bounds + 15))
+    screen.blit(level_text, (600 + scale + 90, top_bounds - 90))
 
     scale = 50
     screen.blit(tank_text, (10, top_bounds))
@@ -610,5 +641,8 @@ while keep_going:
             else:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
             screen.blit(rank_text, (200, 235 + 35*score_index))
+        if score_achieved_index > 10:
+            rank_text = font.render(str(11).ljust(20) + str(ships_destroyed), True, red)
+            screen.blit(rank_text, (200, 235 + 35*11))
 
     pygame.display.flip()
