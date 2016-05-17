@@ -28,6 +28,7 @@ ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
 rocket_image = pygame.image.load("rocket.gif").convert_alpha()
 splash = pygame.image.load("Splash screen.jpg").convert_alpha()
 settings = pygame.image.load("Settings Screen.jpg").convert_alpha()
+highscore_image = pygame.image.load("highscore_image.png").convert_alpha()
 
 dark_gray = (75, 75, 75)
 white = (255, 255, 255)
@@ -109,7 +110,6 @@ yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 return_home = font.render("Back", True, black)
 go_back_home = font.render("Quit".center(18), True, black)
-highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
 money = 50000
@@ -629,20 +629,17 @@ while keep_going:
         screen.blit(settings, (0, 0))
 
     if game_over:
-        screen.blit(blue_surface, (0, 0))
-        screen.blit(game_over_border, (30, 32))
-        screen.blit(game_over_surface, (31, 33))
-        screen.blit(highscore_text, (34, 35))
+        screen.blit(highscore_image, (0, 0))
         rank_text = font.render("Rank".ljust(20) + "Score", True, black)
-        screen.blit(rank_text, (200, 200))
+        screen.blit(rank_text, (400, 195))
         for score_index in range(0, len(high_scores[0:10])):
             if score_index == score_achieved_index:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, red)
             else:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
-            screen.blit(rank_text, (200, 235 + 35*score_index))
+            screen.blit(rank_text, (400, 230 + 35*score_index))
         if score_achieved_index > 10:
             rank_text = font.render(str(11).ljust(20) + str(ships_destroyed), True, red)
-            screen.blit(rank_text, (200, 235 + 35*11))
+            screen.blit(rank_text, (400, 230 + 35*11))
 
     pygame.display.flip()
