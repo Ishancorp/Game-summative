@@ -11,6 +11,7 @@
 import pygame
 from pygame.locals import *
 import math
+import random
 from random import randint
 
 pygame.init()
@@ -18,7 +19,7 @@ screen = pygame.display.set_mode((1015, 768))
 
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game Initial Sketch.png").convert_alpha()  # the background pic needs to be 1015x595 px.
-tank_image = pygame.image.load("Tank.gif").convert_alpha()
+tank_image = pygame.transform.rotate((pygame.image.load("Tank.gif").convert_alpha()), 180)
 missile_image = pygame.image.load("Missle Launcher.png").convert_alpha()
 mine_image = pygame.image.load("Sea mine.png").convert_alpha()
 bullet_image = pygame.image.load("projectile.gif").convert_alpha()
@@ -27,13 +28,16 @@ ship2_image = pygame.image.load("Army Ship Level 2.gif").convert_alpha()
 ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
 rocket_image = pygame.image.load("Army Rocket.gif").convert_alpha()
 splash = pygame.image.load("Splash_Screen.jpg").convert_alpha()
-select = pygame.image.load("select.png")
 settings = pygame.image.load("Settings_Screen.png").convert_alpha()
+highscore_image = pygame.image.load("highscores_background.png").convert_alpha()
+select = pygame.image.load("select.png")
 
-# Load music and sound effect files here:
+
+# Load music and sound effects here:
 gunshot = pygame.mixer.Sound("gunshot.wav")
 bomb = pygame.mixer.Sound("bomb.wav")
 explosion = pygame.mixer.Sound("explosion.wav")
+pygame.mixer.music.load("start_music.mp3")
 
 dark_gray = (75, 75, 75)
 white = (255, 255, 255)
@@ -115,11 +119,10 @@ yes_music = font.render("Turn Music on", True, black)
 no_music = font.render("Turn Music off", True, black)
 return_home = font.render("Back", True, black)
 go_back_home = font.render("Quit".center(18), True, black)
-highscore_text = splash_font.render("HIGHSCORES".center(18), True, black)
 
 # setting up variables that will be displayed on top
-money = 10000000
-chances = 3
+money = 50000
+chances = 2000
 pause = True
 ships_destroyed = 0
 ships_remaining = 0
@@ -127,6 +130,8 @@ tank_pressed = True
 missile_pressed = False
 seamine_pressed = False
 wave_interval = 800
+
+high_scores = []
 
 music = True
 
@@ -320,45 +325,45 @@ class Ship(pygame.sprite.Sprite):
     def update(self):
         self.x = self.rect.left
         self.y = self.rect.top
-        if self.y < 160:
+        if self.y < 150:
             self.dir_y = 1
             self.dir_x = 0
-        elif self.y == 165:
+        elif self.y == 155:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = random.randrange(90, 130)
-        elif 300 > self.y > 175 and self.x < 850:
+            self.dir_y = random.randrange(90, 180)
+        elif 386 > self.y > 246 and self.x < 850 - 45:
             self.dir_y = 0
             self.dir_x = 1
-        elif self.x == 850 and self.y < 330:
+        elif self.x == 850 - 45 and self.y < 360:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_x = random.randrange(90, 130)
-        elif self.x > 850 and self.y < 390:
+            self.dir_x = random.randrange(40, 130)
+        elif self.x > 850 - 45 and self.y < 392 - 50:
             self.dir_y = 1
             self.dir_x = 0
-        elif self.y == 392:
+        elif self.y == 392 - 40:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = random.randrange(100, 140)
-        elif 395 < self.y < 600 and self.x > 100:
+            self.dir_y = random.randrange(110, 170)
+            self.dir_x = -120
+        elif 392 - 40 < self.y < 600 and self.x > 100:
             self.dir_x = -1
             self.dir_y = 0
-        elif self.x == 100 and 600 > self.y > 395:
+        elif self.x == 100 and 600 > self.y > 392 - 40:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_x = random.randrange(-30, -70)
-        elif self.x < 100 and 395 <= self.y < 600:
+            self.dir_x = random.randrange(-80, 0)
+        elif self.x < 100 and 392 <= self.y < 600:
             self.dir_x = 0
             self.dir_y = 1
         elif self.x < 100 and self.y == 600:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = random.randrange(65, 65 + 40)
+            self.dir_y = random.randrange(60, 100)
         elif self.y > 600 and self.x < 700:
             self.dir_x = 1
             self.dir_y = 0
-        elif self.y > 600 and self.x > 700:
+        elif self.y > 600 and self.x == 700:
             self.dir_x = 0
             self.dir_y = 0
             self.active = False
             self.victor = True
-
         self.rect = self.image.get_rect()
         self.rect.move_ip(self.x, self.y)
 
@@ -395,7 +400,7 @@ while keep_going:
                     splash_screen = False
                     print("settings")
             elif settings_screen:
-                print(x_unadjusted, y_unadjusted)
+                print (x_unadjusted, y_unadjusted)
                 if (160 - 30 < x_unadjusted < 700) and (320 - 30 < y_unadjusted < 435):
                     music = True
                 elif (160 - 30 < x_unadjusted < 700) and (470 - 30 < y_unadjusted < 535):
@@ -469,7 +474,7 @@ while keep_going:
             ship_spawns = 0
             wave_interval *= 0.925
             if wave_interval < 20:
-                back = pygame.image.load("Game initial sketch.png").convert_alpha()
+                back = pygame.image.load("Game Initial Sketch.png").convert_alpha()
                 tank_price += 500
                 missile_price += 1000
                 mine_price += 75000
@@ -488,18 +493,27 @@ while keep_going:
                     pause = True
             wave_interval = int(wave_interval)
             print(wave_interval)
+
+
+    if music and splash_screen:
+        pygame.mixer.music.play(-1)
+    elif music and settings_screen:
+        pygame.mixer.music.play(-1)
+        
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
         tank_surface.fill(poor)
     else:
         tank_surface.fill(pressed)
+
     if not missile_pressed:
         missile_surface.fill(gray)
     elif (missile_price - money) > 0:
         missile_surface.fill(poor)
     else:
         missile_surface.fill(pressed)
+
     if not seamine_pressed:
         seamine_surface.fill(gray)
     elif (mine_price - money) > 0:
@@ -638,22 +652,18 @@ while keep_going:
         elif not music:
             screen.blit(select, (129, 466))
 
-
     if game_over:
-        screen.blit(blue_surface, (0, 0))
-        screen.blit(game_over_border, (30, 32))
-        screen.blit(game_over_surface, (31, 33))
-        screen.blit(highscore_text, (34, 35))
+        screen.blit(highscore_image, (0, 0))
         rank_text = font.render("Rank".ljust(20) + "Score", True, black)
-        screen.blit(rank_text, (200, 200))
+        screen.blit(rank_text, (400, 195))
         for score_index in range(0, len(high_scores[0:10])):
             if score_index == score_achieved_index:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, red)
             else:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
-            screen.blit(rank_text, (200, 235 + 35*score_index))
+            screen.blit(rank_text, (400, 230 + 35*score_index))
         if score_achieved_index > 10:
             rank_text = font.render(str(11).ljust(20) + str(ships_destroyed), True, red)
-            screen.blit(rank_text, (200, 235 + 35*11))
+            screen.blit(rank_text, (400, 230 + 35*11))
 
     pygame.display.flip()
