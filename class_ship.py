@@ -31,6 +31,10 @@ splash = pygame.image.load("Splash screen.jpg").convert_alpha()
 settings = pygame.image.load("Settings_Screen.png").convert_alpha()
 highscore_image = pygame.image.load("highscores_background.png").convert_alpha()
 select = pygame.image.load("select.png")
+tank_surface = pygame.image.load("surface.png").convert_alpha()
+missile_surface = pygame.image.load("surface.png").convert_alpha()
+seamine_surface = pygame.image.load("surface.png").convert_alpha()
+pause_surface = pygame.image.load("surface.png").convert_alpha()
 
 
 # Load music and sound effects here:
@@ -64,11 +68,6 @@ display = pygame.Surface((325, bottom_bounds)).convert()
 display.fill(gray)
 white_surface = pygame.Surface((1015, 173)).convert()
 white_surface.fill((255, 255, 255))
-
-tank_surface = pygame.Surface((120, bottom_bounds)).convert()
-missile_surface = pygame.Surface((120, bottom_bounds)).convert()
-seamine_surface = pygame.Surface((120, bottom_bounds)).convert()
-pause_surface = pygame.Surface((120, bottom_bounds)).convert()
 
 blue_surface = pygame.Surface(screen.get_size()).convert()
 blue_surface.fill(blue)
@@ -122,7 +121,7 @@ go_back_home = font.render("Quit".center(18), True, black)
 
 # setting up variables that will be displayed on top
 money = 50000
-chances = 0
+chances = 5
 pause = True
 ships_destroyed = 9
 ships_remaining = 0
@@ -391,16 +390,19 @@ while keep_going:
             x = (x_unadjusted//35)*35  # getting the x of where the mouse clicked
             y = (y_unadjusted//35)*35  # getting the y of where the mouse clicked
             if splash_screen:
+                music = True
                 if (380 < x_unadjusted < 640) and (480 < y_unadjusted < 570):
                     print("play")
                     splash_screen = False
                     pause = False
+                    music = False
                 elif (300 < x_unadjusted < 750) and (590 < y_unadjusted < 680):
                     settings_screen = True
                     splash_screen = False
                     print("settings")
             elif settings_screen:
                 print (x_unadjusted, y_unadjusted)
+                music = True
                 if (0 < x_unadjusted < 1015) and (320 - 50 < y_unadjusted < 435 + 30):
                     music = True
                 elif (0 < x_unadjusted < 1015) and (470 - 30 < y_unadjusted < 535 + 10):
@@ -412,6 +414,7 @@ while keep_going:
             elif game_over:
                 pass
             else:
+                music = False
                 y_clicked = 142 > y_unadjusted > 9
 
                 if 131 > x_unadjusted > 9 and y_clicked:  # if the tank part of the menu is pressed
@@ -495,31 +498,28 @@ while keep_going:
             print(wave_interval)
 
     if music:
-        if splash_screen:
-            pygame.mixer.music.play(-1)
-        elif settings_screen:
-            pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(-1)
 
-    if not tank_pressed:
-        tank_surface.fill(gray)
-    elif (tank_price - money) > 0:
-        tank_surface.fill(poor)
-    else:
-        tank_surface.fill(pressed)
-
-    if not missile_pressed:
-        missile_surface.fill(gray)
-    elif (missile_price - money) > 0:
-        missile_surface.fill(poor)
-    else:
-        missile_surface.fill(pressed)
-
-    if not seamine_pressed:
-        seamine_surface.fill(gray)
-    elif (mine_price - money) > 0:
-        seamine_surface.fill(poor)
-    else:
-        seamine_surface.fill(pressed)
+    # if not tank_pressed:
+    #     tank_surface.fill(gray)
+    # elif (tank_price - money) > 0:
+    #     tank_surface.fill(poor)
+    # else:
+    #     tank_surface.fill(pressed)
+    #
+    # if not missile_pressed:
+    #     missile_surface.fill(gray)
+    # elif (missile_price - money) > 0:
+    #     missile_surface.fill(poor)
+    # else:
+    #     missile_surface.fill(pressed)
+    #
+    # if not seamine_pressed:
+    #     seamine_surface.fill(gray)
+    # elif (mine_price - money) > 0:
+    #     seamine_surface.fill(poor)
+    # else:
+    #     seamine_surface.fill(pressed)
 
     if pause:
         pause_surface.fill(red)
