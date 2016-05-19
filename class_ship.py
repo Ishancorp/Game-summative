@@ -20,14 +20,14 @@ screen = pygame.display.set_mode((1015, 768))
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game Initial Sketch.png").convert_alpha()  # the background pic needs to be 1015x595 px.
 tank_image = pygame.transform.rotate((pygame.image.load("Tank.gif").convert_alpha()), 180)
-missile_image = pygame.image.load("Missle Launcher.png").convert_alpha()
+missile_image = pygame.image.load("Missile Launcher.gif").convert_alpha()
 mine_image = pygame.image.load("Sea mine.png").convert_alpha()
 bullet_image = pygame.image.load("projectile.gif").convert_alpha()
 ship1_image = pygame.image.load("Army Ship Level 1.gif").convert_alpha()
 ship2_image = pygame.image.load("Army Ship Level 2.gif").convert_alpha()
 ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
 rocket_image = pygame.image.load("Army Rocket.gif").convert_alpha()
-splash = pygame.image.load("Splash_Screen.jpg").convert_alpha()
+splash = pygame.image.load("Splash screen.jpg").convert_alpha()
 settings = pygame.image.load("Settings_Screen.png").convert_alpha()
 highscore_image = pygame.image.load("highscores_background.png").convert_alpha()
 select = pygame.image.load("select.png")
@@ -122,9 +122,9 @@ go_back_home = font.render("Quit".center(18), True, black)
 
 # setting up variables that will be displayed on top
 money = 50000
-chances = 2000
+chances = 0
 pause = True
-ships_destroyed = 0
+ships_destroyed = 9
 ships_remaining = 0
 tank_pressed = True
 missile_pressed = False
@@ -401,11 +401,11 @@ while keep_going:
                     print("settings")
             elif settings_screen:
                 print (x_unadjusted, y_unadjusted)
-                if (160 - 30 < x_unadjusted < 700) and (320 - 30 < y_unadjusted < 435):
+                if (0 < x_unadjusted < 1015) and (320 - 50 < y_unadjusted < 435 + 30):
                     music = True
-                elif (160 - 30 < x_unadjusted < 700) and (470 - 30 < y_unadjusted < 535):
+                elif (0 < x_unadjusted < 1015) and (470 - 30 < y_unadjusted < 535 + 10):
                     music = False
-                elif y_unadjusted < 100:
+                elif y_unadjusted > 650:
                     splash_screen = True
                     pause = True
                     settings_screen = False
@@ -494,12 +494,12 @@ while keep_going:
             wave_interval = int(wave_interval)
             print(wave_interval)
 
+    if music:
+        if splash_screen:
+            pygame.mixer.music.play(-1)
+        elif settings_screen:
+            pygame.mixer.music.play(-1)
 
-    if music and splash_screen:
-        pygame.mixer.music.play(-1)
-    elif music and settings_screen:
-        pygame.mixer.music.play(-1)
-        
     if not tank_pressed:
         tank_surface.fill(gray)
     elif (tank_price - money) > 0:
@@ -648,22 +648,22 @@ while keep_going:
     if settings_screen:
         screen.blit(settings, (0, 0))
         if music:
-            screen.blit(select, (129, 372))
+            screen.blit(select, (132, 382 + 15))
         elif not music:
-            screen.blit(select, (129, 466))
+            screen.blit(select, (132, 470 + 13))
 
     if game_over:
         screen.blit(highscore_image, (0, 0))
         rank_text = font.render("Rank".ljust(20) + "Score", True, black)
-        screen.blit(rank_text, (400, 195))
+        screen.blit(rank_text, (400, 195 + 60))
         for score_index in range(0, len(high_scores[0:10])):
             if score_index == score_achieved_index:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, red)
             else:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
-            screen.blit(rank_text, (400, 230 + 35*score_index))
+            screen.blit(rank_text, (400, 230 + 35*score_index + 60))
         if score_achieved_index > 10:
             rank_text = font.render(str(11).ljust(20) + str(ships_destroyed), True, red)
-            screen.blit(rank_text, (400, 230 + 35*11))
+            screen.blit(rank_text, (400, 230 + 35*11 + 60))
 
     pygame.display.flip()
