@@ -131,8 +131,7 @@ paused = font.render("", True, black)
 go_back_home = font.render("Quit".center(18), True, black)
 
 # setting up variables that will be displayed on top
-#money = 55000
-money = 550000000000000
+money = 55000
 chances = 3
 pause = True
 ships_destroyed = 9
