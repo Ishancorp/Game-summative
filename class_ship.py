@@ -20,22 +20,48 @@ screen = pygame.display.set_mode((1015, 768))
 # Loading images and initializing list to store them in
 back = pygame.image.load("Game Initial Sketch.png").convert_alpha()  # the background pic needs to be 1015x595 px.
 tank_image = pygame.transform.rotate((pygame.image.load("Tank.gif").convert_alpha()), 180)
-missile_image = pygame.image.load("Missile Launcher.gif").convert_alpha()
+missile_image = pygame.image.load("Missle Launcher.png").convert_alpha()
 mine_image = pygame.image.load("Sea mine.png").convert_alpha()
+
 bullet_image = pygame.image.load("projectile.gif").convert_alpha()
+rocket_image = pygame.image.load("Army Rocket.gif").convert_alpha()
+
 ship1_image = pygame.image.load("Army Ship Level 1.gif").convert_alpha()
 ship2_image = pygame.image.load("Army Ship Level 2.gif").convert_alpha()
 ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
-rocket_image = pygame.image.load("Army Rocket.gif").convert_alpha()
-splash = pygame.image.load("Splash screen.jpg").convert_alpha()
-settings = pygame.image.load("Settings_Screen.png").convert_alpha()
-highscore_image = pygame.image.load("highscores_background.png").convert_alpha()
-select = pygame.image.load("select.png")
-tank_surface = pygame.image.load("surface.png").convert_alpha()
-missile_surface = pygame.image.load("surface.png").convert_alpha()
-seamine_surface = pygame.image.load("surface.png").convert_alpha()
-pause_surface = pygame.image.load("surface.png").convert_alpha()
 
+splash = pygame.image.load("Splash_Screen.jpg").convert_alpha()
+
+highscore_image = pygame.image.load("highscores_background.png").convert_alpha()
+
+settings = pygame.image.load("Settings_Screen.png").convert_alpha()
+select = pygame.image.load("select.png")
+
+tank_grey = pygame.image.load("grey_surface.png").convert_alpha()
+missile_grey = pygame.image.load("grey_surface.png").convert_alpha()
+seamine_grey = pygame.image.load("grey_surface.png").convert_alpha()
+
+pause_red = pygame.image.load("pause_red.png").convert_alpha()
+pause_green = pygame.image.load("pause_green.png").convert_alpha()
+back_button_surface = pygame.image.load("back_button_surface.png").convert_alpha()
+
+tank_red = pygame.image.load("red_surface.png").convert_alpha()
+missile_red = pygame.image.load("red_surface.png").convert_alpha()
+seamine_red = pygame.image.load("red_surface.png").convert_alpha()
+
+tank_green = pygame.image.load("surface.png").convert_alpha()
+missile_green = pygame.image.load ("surface.png").convert_alpha ()
+seamine_green = pygame.image.load ("surface.png").convert_alpha ()
+
+white_surface = pygame.image.load("back_surface.png").convert_alpha()
+
+money_surface = pygame.image.load("money_surface.png").convert_alpha()
+ships_destroyed_surface = pygame.image.load("ships_destroyed_surface.png").convert_alpha()
+weapons_surface = pygame.image.load("weapons_surface.png").convert_alpha()
+chances_surface = pygame.image.load("chances_surface.png").convert_alpha()
+
+swirl_1 = pygame.image.load("swirl_image.png").convert_alpha()
+swirl_2 = pygame.image.load("swirl_image.png").convert_alpha()
 
 # Load music and sound effects here:
 gunshot = pygame.mixer.Sound("gunshot.wav")
@@ -62,12 +88,6 @@ dark_blue = (100, 100, 200)
 bottom_bounds = 155
 border = pygame.Surface((122, bottom_bounds + 2)).convert()
 border.fill(dark_gray)
-main_border = pygame.Surface((327, bottom_bounds + 2)).convert()
-main_border.fill(dark_gray)
-display = pygame.Surface((325, bottom_bounds)).convert()
-display.fill(gray)
-white_surface = pygame.Surface((1015, 173)).convert()
-white_surface.fill((255, 255, 255))
 
 blue_surface = pygame.Surface(screen.get_size()).convert()
 blue_surface.fill(blue)
@@ -80,17 +100,15 @@ game_over_border.fill(dark_gray)
 game_over_surface = pygame.Surface((950, 700)).convert()
 game_over_surface.fill(light_gray)
 
+back_button_border = pygame.Surface((122, 77)).convert()
+back_button_border.fill(black)
+
 yes_music_surface = pygame.Surface((50, 50)).convert()
 yes_music_surface.fill(green)
 no_music_surface = pygame.Surface((50, 50)).convert()
 no_music_surface.fill(light_gray)
 return_home_surface = pygame.Surface((1015, 100))
 return_home_surface.fill(red)
-
-back_button_surface = pygame.Surface((120, bottom_bounds)).convert()
-back_button_surface.fill(dark_blue)
-back_button_border_surface = pygame.Surface((122, bottom_bounds + 2)).convert()
-back_button_border_surface.fill(black)
 
 tank_price = 1000
 mine_price = 50000
@@ -109,19 +127,11 @@ mine_text = font.render("Sea Mine".center(18), True, black)
 mine_cost = font.render(("$"+str(mine_price)).center(18), True, black)
 paused = font.render("", True, black)
 
-play_text = splash_font.render("Play".center(11), True, black)
-settings_text = splash_font.render("Settings".center(11), True, black)
-
-title_text = title_font.render("WORLD WAR SEA", True, black)
-music_title = splash_font.render("Music Settings: ", True, black)
-yes_music = font.render("Turn Music on", True, black)
-no_music = font.render("Turn Music off", True, black)
-return_home = font.render("Back", True, black)
 go_back_home = font.render("Quit".center(18), True, black)
 
 # setting up variables that will be displayed on top
-money = 50000
-chances = 5
+money = 55000
+chances = 3
 pause = True
 ships_destroyed = 9
 ships_remaining = 0
@@ -139,6 +149,7 @@ ship_spawns = 0
 # variables relating to tank
 sprite_type = ""
 angle = 0
+weapons = 0
 
 splash_screen = True
 settings_screen = False
@@ -432,13 +443,13 @@ while keep_going:
                     missile_pressed = False
                     seamine_pressed = True
 
-                elif y_clicked and 400 < x_unadjusted < 520:  # if any other part of the menu is pressed
+                elif 90 > y_unadjusted > 9 and 400 < x_unadjusted < 520:  # if any other part of the menu is pressed
                     if pause:  # if the game is already paused
                         pause = False
                     elif not pause:  # if the game is not already paused
                         pause = True
 
-                elif y_clicked and 529 < x_unadjusted < 649:
+                elif 142 > y_unadjusted > 91 and 400 < x_unadjusted < 520:
                     splash_screen = True
                     pause = True
                     player_group.empty()
@@ -456,15 +467,18 @@ while keep_going:
 
                     if not overlap:
                         if tank_pressed and pathway_pressed and (money - tank_price) >= 0:
+                            weapons += 1
                             player_group.add(Tank(x, y))
                             money -= tank_price
 
                         elif missile_pressed and pathway_pressed and money - missile_price >= 0:
                             player_group.add(MissileLauncher())
+                            weapons += 1
                             money -= missile_price
 
                         elif seamine_pressed and money - mine_price >= 0 and not pathway_pressed:
                             player_group.add(Mine(x, y))
+                            weapons += 1
                             money -= mine_price
 
                         else:
@@ -500,47 +514,42 @@ while keep_going:
     if music:
         pygame.mixer.music.play(-1)
 
-    # if not tank_pressed:
-    #     tank_surface.fill(gray)
-    # elif (tank_price - money) > 0:
-    #     tank_surface.fill(poor)
-    # else:
-    #     tank_surface.fill(pressed)
-    #
-    # if not missile_pressed:
-    #     missile_surface.fill(gray)
-    # elif (missile_price - money) > 0:
-    #     missile_surface.fill(poor)
-    # else:
-    #     missile_surface.fill(pressed)
-    #
-    # if not seamine_pressed:
-    #     seamine_surface.fill(gray)
-    # elif (mine_price - money) > 0:
-    #     seamine_surface.fill(poor)
-    # else:
-    #     seamine_surface.fill(pressed)
+    if not tank_pressed:
+        tank_surface = tank_grey
+    elif (tank_price - money) > 0:
+        tank_surface = tank_red
+    else:
+        tank_surface = tank_green
+
+    if not missile_pressed:
+        missile_surface = missile_grey
+    elif (missile_price - money) > 0:
+        missile_surface = missile_red
+    else:
+        missile_surface = missile_green
+
+    if not seamine_pressed:
+        seamine_surface = seamine_grey
+    elif (mine_price - money) > 0:
+        seamine_surface = seamine_red
+    else:
+        seamine_surface = seamine_green
 
     if pause:
-        pause_surface.fill(red)
-        paused = "Paused".center(18)
+        pause_surface = pause_green
     else:
-        pause_surface.fill(green)
-        paused = "Resumed".center(18)
+        pause_surface = pause_red
 
     if not pause:
         ship_group.update()
         player_group.update()
         bullet_group.update()
 
-    money_text = font.render("Money: $"+str(money), True, black)
-    numweapons_text = font.render("Weapons: "+str(0), True, black)
-    islandsdestroyed_text = font.render("Islands Destroyed: "+str(3-chances), True, black)
-    chance_text = font.render("Chances: "+str(chances), True, black)
-    shipsdestroyed_text = font.render("Ships Destroyed: "+str(ships_destroyed), True, black)
-    shipsremaining_text = font.render("Ships Remaining: "+str(len(ship_group)), True, black)
-    paused_text = font.render(paused, True, black)
-    level_text = font.render("Level "+str(level), True, black)
+    money_text = font.render("Money: $"+str(money), True, white)
+    numweapons_text = font.render("Ammo Used: " + str(weapons), True, white)
+    chance_text = font.render("Chances: "+str(chances), True, white)
+    shipsdestroyed_text = font.render("Ships Dead: "+str(ships_destroyed), True, white)
+    level_text = font.render("Level "+str(level), True, white)
 
     # Blitting
     screen.blit(back, (0, 173))
@@ -610,21 +619,22 @@ while keep_going:
     screen.blit(missile_surface, (140, top_bounds))
     screen.blit(border, (269, top_bounds - 1))
     screen.blit(seamine_surface, (270, top_bounds))
-    screen.blit(main_border, (679, top_bounds - 1))
-    screen.blit(display, (680, top_bounds))
-    screen.blit(border, (399, top_bounds - 1))
     screen.blit(pause_surface, (400, top_bounds))
 
     scale = 125
     top_bounds = 100
-    screen.blit(paused_text, (408, 70))
-    screen.blit(islandsdestroyed_text, (400 + scale + 200, top_bounds + 15))
-    screen.blit(shipsdestroyed_text, (400 + scale + 200, top_bounds - 25))
-    screen.blit(money_text, (400 + scale + 200, top_bounds - 65))
-    screen.blit(shipsremaining_text, (650 + scale + 100, top_bounds - 25))
-    screen.blit(numweapons_text, (650 + scale + 100, top_bounds - 65))
-    screen.blit(chance_text, (650 + scale + 100, top_bounds + 15))
-    screen.blit(level_text, (600 + scale + 90, top_bounds - 90))
+    screen.blit(money_surface, (530 + 65, 10))
+    screen.blit(money_text, (543 + 65, 85))
+    screen.blit(ships_destroyed_surface, (635 + 65, 10))
+    screen.blit(shipsdestroyed_text, (640 + 65, 85))
+    screen.blit(weapons_surface, (740 + 65, 10))
+    screen.blit(numweapons_text, (750 + 65, 85))
+    screen.blit(chances_surface, (845 + 65, 10))
+    screen.blit(chance_text, (855 + 65, 85))
+
+    screen.blit(swirl_1, (600, 150))
+    screen.blit(level_text, (743, 150))
+    screen.blit(swirl_2, (800, 150))
 
     scale = 50
     screen.blit(tank_text, (10, top_bounds))
@@ -634,9 +644,8 @@ while keep_going:
     screen.blit(missile_cost, (140, top_bounds + 15))
     screen.blit(mine_cost, (270, top_bounds + 15))
 
-    screen.blit(back_button_border_surface, (529, top_bounds - 91))
-    screen.blit(back_button_surface, (530, top_bounds - 90))
-    screen.blit(go_back_home, (535, 70))
+    screen.blit(back_button_border, (400, 90))
+    screen.blit(back_button_surface, (400, 90))
 
     screen.blit(tank_image, (scale + 3, 50))
     screen.blit(missile_image, (scale + 98, 50))
