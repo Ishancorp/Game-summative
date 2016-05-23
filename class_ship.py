@@ -34,9 +34,7 @@ ship3_image = pygame.image.load("Army Ship Level 3.gif").convert_alpha()
 # Loading image for the splash screen, highscore screen, and setting screen
 splash = pygame.image.load("Splash_Screen.jpg").convert_alpha()
 highscore_image = pygame.image.load("highscores_background.png").convert_alpha()
-settings = pygame.image.load("Settings_Screen.jpg").convert_alpha()
-
-
+settings = pygame.image.load("Settings_Screen.png").convert_alpha()
 select = pygame.image.load("select.png")  # For music button
 item_grey = pygame.image.load("grey_surface.png").convert_alpha()  # for buttons for selecting items, if selected
 pause_red = pygame.image.load("pause_red.png").convert_alpha()  # pause button
@@ -47,7 +45,6 @@ item_green = pygame.image.load("surface.png").convert_alpha()  # if enough money
 white_surface = pygame.image.load("back_surface.png").convert_alpha()  # surface just above gameplay area
 swirl = pygame.image.load("swirl_image.png").convert_alpha()  # surface to display swirl designs
 social = pygame.image.load("socialmediabar.png").convert_alpha()  # surface to display social bar options
-
 
 # Surfaces to display money, number of ships destroyed, number of weapons placed, and number of chances remaining
 money_surface = pygame.image.load("money_surface.png").convert_alpha()
@@ -291,7 +288,7 @@ class Ship(pygame.sprite.Sprite):
         elif 386 > self.y > 246 and self.x < 850 - 45:
             self.dir_y = 0
             self.dir_x = 1
-        elif self.x == 850 - 45 and self.y < 360:
+        elif self.x == 850 - 45 and self.y < 385:
             self.image = pygame.transform.rotate(self.image, 90)
             self.dir_x = randint(40, 130)
         elif self.x > 850 - 45 and self.y < 392 - 50:
@@ -560,9 +557,10 @@ while keep_going:
         with open("highscores.txt", "w") as file:
             for score in high_scores[0:10]:
                 file.write(str(score)+chr(10))
-                #chances = 1
+                chances = 1
         print(high_scores)
         game_over = True
+
     # blitting the top part of the screen
     top_bounds = 10
     screen.blit(white_surface, (0, 0))
