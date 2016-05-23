@@ -176,7 +176,7 @@ class Rocket(pygame.sprite.Sprite):
         for enemy in ship_group:
             if self.rect.colliderect(enemy.rect):
                 self.active = False
-                enemy.health -= 4
+                enemy.health -= 5
                 if music:
                     bomb.play()
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -228,7 +228,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in ship_group:
             if self.rect.colliderect(enemy.rect):
                 self.active = False
-                enemy.health -= 1/3
+                enemy.health -= 5
                 if music:
                     gunshot.play()
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -303,7 +303,7 @@ class Ship(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         ship_choice = randint(1, 6)
         print(ship_choice)
-        if ship_choice == 1:
+        if 6 >= ship_choice >= 1:
             self.image = ship3_image
             self.health = 2000
             self.late_money = 5000
@@ -339,36 +339,36 @@ class Ship(pygame.sprite.Sprite):
             self.dir_x = 0
         elif self.y == 155:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = random.randrange(90, 180)
-        elif 386 > self.y > 246 and self.x < 850 - 45:
+            self.y = random.randrange(250, 345)
+        elif 345 > self.y > 250 and self.x < 800:
             self.dir_y = 0
             self.dir_x = 1
-        elif self.x == 850 - 45 and self.y < 360:
+        elif self.x == 800 and 345 > self.y > 250:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_x = random.randrange(40, 130)
-        elif self.x > 850 - 45 and self.y < 392 - 30:
+            self.x = random.randrange(850, 980)
+        elif 981 > self.x > 850 and self.y < 345:
             self.dir_y = 1
             self.dir_x = 0
-        elif self.y == 392 - 40:
+        elif self.y == 345:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = random.randrange(110, 170)
-            self.dir_x = -120
-        elif 392 - 40 < self.y < 600 and self.x > 100:
+            self.y = random.randrange(461, 531)
+            self.x = 800
+        elif 460 < self.y < 532 and self.x > 100:
             self.dir_x = -1
             self.dir_y = 0
-        elif self.x == 100 and 600 > self.y > 392 - 40:
+        elif self.x == 100 and 532 > self.y > 460:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_x = random.randrange(-80, 0)
+            self.x = random.randrange(99, 100)
         elif self.x < 100 and 392 <= self.y < 600:
             self.dir_x = 0
             self.dir_y = 1
         elif self.x < 100 and self.y == 600:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.dir_y = random.randrange(60, 100)
-        elif self.y > 600 and self.x < 700:
+            self.y = random.randrange(630, 760)
+        elif self.y > 630 and self.x < 650:
             self.dir_x = 1
             self.dir_y = 0
-        elif self.y > 600 and self.x == 700:
+        elif self.y > 630 and self.x == 650:
             self.dir_x = 0
             self.dir_y = 0
             self.active = False
@@ -409,7 +409,7 @@ while keep_going:
                     settings_screen = True
                     splash_screen = False
                     print("settings")
-                elif y_selected and x < 840:
+                elif y_selected and x < 840 + 25:
                     webbrowser.get().open ('http://www.twitter.com')
                 elif y_selected and 840 + 25 < x < 890:
                     webbrowser.get().open ('http://www.facebook.com')
@@ -419,6 +419,13 @@ while keep_going:
                     webbrowser.get().open ('http://plus.google.com')
                 elif y_selected and 965 < x < 990:
                     webbrowser.get ().open ('http://www.instagram.com')
+            elif game_over:
+                if y > 400:
+                    game_over = False
+                    splash_screen = True
+                    settings_screen = False
+                    music = True
+                    pygame.mixer.music.rewind()
             elif settings_screen:
                 print (x_unadjusted, y_unadjusted)
                 if (0 < x_unadjusted < 1015) and (320 - 30 < y_unadjusted < 435 + 30):
@@ -429,8 +436,6 @@ while keep_going:
                     splash_screen = True
                     pause = True
                     settings_screen = False
-            elif game_over:
-                music = True
 
             else:
                 y_clicked = 142 > y_unadjusted > 9
@@ -465,11 +470,10 @@ while keep_going:
 
                 elif (not pause) and y > 150:  # if the main gameplay part is pressed
                     item = 0
-                    pathway_pressed = (y < 243 and x > 140) or (383 < y < 453 and x < 840) or (595 >= y > 525 and x > 140) or (y > 595 and x > 840)
+                    pathway_pressed = (y < 243 and x > 140) or (383 < y < 453 and x < 840) or (595 >= y > 525 and x > 140) or (y > 595 and x > 840)  # boolean for whether or not the path is pressed
                     overlap = False
-
-                    for player in player_group.sprites():
-                        if player.x-1 <= x <= (player.x + player.size[0]-1) and player.y-1 <= y <= (player.y + player.size[1]-1):
+                    for player in player_group.sprites ():
+                        if (x == player.x and y == player.y) or (missile_pressed and player.x - 70 <= x <= player.x and y == player.y) or (player.type == "M" and player.x <= x <= player.x + 70 and y == player.y):  # if an item overlaps with any other item
                             overlap = True
 
                     if not overlap:
@@ -590,10 +594,11 @@ while keep_going:
 
     if chances == 0:
         pause = True
+        game_over = True
+        chances = 3
         player_group.empty()
         ship_group.empty()
         bullet_group.empty()
-        game_over = True
         high_scores = []
         with open("highscores.txt", "r") as file:
             for line in file:
@@ -620,18 +625,10 @@ while keep_going:
         with open("highscores.txt", "w") as file:
             for score in high_scores[0:10]:
                 file.write(str(score)+chr(10))
-                chances = 3
         print(high_scores[0:10])
         game_over = True
         print(len(high_scores))
-        x_unadjusted = ev.pos[0]
-        y_unadjusted = ev.pos[1]
-        x = (x_unadjusted // 35) * 35  # getting the x of where the mouse clicked
-        y = (y_unadjusted // 35) * 35  # getting the y of where the mouse clicked
-        if y > 400:
-            splash_screen = True
-            game_over = False
-            chances = 3
+
 
     # blitting the top part of the screen
     top_bounds = 10
