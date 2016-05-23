@@ -100,6 +100,7 @@ splash_screen = True
 settings_screen = False
 game_over = False
 level = 1
+score_achieved_index = 0
 
 
 class Rocket(pygame.sprite.Sprite):  # sprite for the rocket
