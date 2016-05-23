@@ -132,3 +132,8 @@
     - "README.md" (readme file):
         This file contains a list of all the files used in the game. It also has a more thorough header block than the
         one in the program file.
+
+
+Controls:
+    - mouse clicks
+        click on buttons, and put player sprites on remainder of gameplay
