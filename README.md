@@ -94,7 +94,7 @@
     - "Army Ship Level 3.gif":
         This file contains the largest and strongest enemy ship.
 
-    - "projectile.gif":
+    - "projectile.png":
         This file contains the image for the bullet that the tank fires on the ship.
 
     - "Tank.gif":
