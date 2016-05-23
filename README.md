@@ -135,5 +135,5 @@
 
 
 Controls:
-    - mouse clicks
+    - mouse clicks:
         click on buttons, and put player sprites on remainder of gameplay
