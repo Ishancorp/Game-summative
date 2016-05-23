@@ -529,7 +529,7 @@ while keep_going:
             money += ship.money
             ships_destroyed += 1
 
-    if chances == 0:  # if the game is over, open high scores file and write to it if new high score surpasses others
+    if chances == 0 and len(high_scores) == 0:  # if the game is over, open high scores file and write to it if new high score surpasses others
         pause = True
         player_group.empty()
         ship_group.empty()
@@ -556,12 +556,13 @@ while keep_going:
                     break
             if not done:
                 high_scores.append(ships_destroyed)
+                score_achieved_index = 10
         with open("highscores.txt", "w") as file:
             for score in high_scores[0:10]:
                 file.write(str(score)+chr(10))
-                chances = 3
+                #chances = 1
+        print(high_scores)
         game_over = True
-
     # blitting the top part of the screen
     top_bounds = 10
     screen.blit(white_surface, (0, 0))
@@ -613,14 +614,11 @@ while keep_going:
         screen.blit(highscore_image, (0, 0))
         rank_text = font.render("Rank".ljust(20) + "Score", True, black)
         screen.blit(rank_text, (450, 140 + 60))
-        for score_index in range(0, len(high_scores[0:10])):
+        for score_index in range(0, len(high_scores)):
             if score_index == score_achieved_index:
                 rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, (255, 0, 0))
             else:
-                rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, white)
+                rank_text = font.render((str(score_index + 1)).ljust(20) + str(high_scores[score_index]), True, black)
             screen.blit(rank_text, (450, 175 + 35*score_index + 60))
-        if score_achieved_index > 10:
-            rank_text = font.render(str(11).ljust(20) + str(ships_destroyed), True, (255, 0, 0))
-            screen.blit(rank_text, (450, 175 + 35*10 + 60))
 
     pygame.display.flip()
