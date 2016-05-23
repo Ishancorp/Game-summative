@@ -370,7 +370,7 @@ while keep_going:
                     music = True
                 elif (0 < x_unadjusted < 1015) and (470 - 30 < y_unadjusted < 535 + 10):
                     music = False
-                elif y_unadjusted < 200:  # if go back is pressed, go back to splash screen
+                elif y_unadjusted > 650:  # if go back is pressed, go back to splash screen
                     splash_screen = True
                     pause = True
                     settings_screen = False
