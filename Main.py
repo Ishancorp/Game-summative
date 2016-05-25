@@ -8,15 +8,16 @@
 # Involves the militarization of an island in defence of an incoming attack
 # For specific data on the game, open "ReadMe - Understanding the Game.txt"
 
-# Files used in the game:
-#   - Python files
+# Types of files used in the game:
+#   - .py python code files
 #   - .gif image files
 #   - .png image files
 #   - .jpg image files
-#   - .wav music files
-#   - .mp3 music files
 #   - .txt text files
-# For a detailed description of every file, visit the ReadMe - List of Files
+#   - .wav sound effect files
+#   - .mp3 music files
+
+# For more details on the files used, refer to the ReadMe - List of Files.txt
 
 # Input: Selections made in game through mouse clicks
 # Output: Playing the game
@@ -125,6 +126,8 @@ bottom_bounds = 155
 border = pygame.Surface((122, bottom_bounds + 2)).convert()
 border.fill(dark_gray)
 
+change = False
+
 blue_surface = pygame.Surface(screen.get_size()).convert()
 blue_surface.fill(blue)
 border_play = pygame.Surface((302, 102)).convert()
@@ -160,8 +163,8 @@ paused = font.render("", True, black)
 go_back_home = font.render("Quit".center(18), True, black)
 
 # setting up variables that will be displayed on top
-money = 55000
-chances = 0
+money = 10000
+chances = 50000
 pause = True
 ships_destroyed = 9
 ships_remaining = 0
@@ -226,7 +229,7 @@ class Rocket(pygame.sprite.Sprite):
         for enemy in ship_group:
             if self.rect.colliderect(enemy.rect):
                 self.active = False
-                enemy.health -= 5
+                enemy.health -= 1
                 if music:
                     bomb.play()
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -303,7 +306,7 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in ship_group:
             if self.rect.colliderect(enemy.rect):
                 self.active = False
-                enemy.health -= 5
+                enemy.health -= 1
                 if music:
                     gunshot.play()
         if 0 > self.x or self.x > screen.get_size()[0] or 0 > self.y or self.y > screen.get_size()[1]:
@@ -402,12 +405,13 @@ class MissileLauncher(pygame.sprite.Sprite):
 # Initializing the money earned from it's hit in the ship
 # Size of ship is defined
 # Health of ship is defined based in the type of ship selected from the random
+# If the level is incremented, the health of the ship goes up
 # Loot from ship is also defined based on type of whip coming from random selection
 class Ship(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
         ship_choice = randint(1, 6)
-        if 6 >= ship_choice >= 1:
+        if 1 <= ship_choice <= 6:
             self.image = ship3_image
             self.health = 2000
             self.late_money = 5000
@@ -420,7 +424,7 @@ class Ship(pygame.sprite.Sprite):
             self.health = 1250
             self.late_money = 500
 
-        if level == 2:
+        if change:
             self.health += 500
             self.late_money += 750
         self.rect = self.image.get_rect()
@@ -446,32 +450,32 @@ class Ship(pygame.sprite.Sprite):
             self.dir_x = 0
         elif self.y == 155:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.y = random.randrange(250, 345)
+            self.y = random.randrange(251, 344)
         elif 345 > self.y > 250 and self.x < 800:
             self.dir_y = 0
             self.dir_x = 1
         elif self.x == 800 and 345 > self.y > 250:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.x = random.randrange(850, 980)
+            self.x = random.randrange(851, 980)
         elif 981 > self.x > 850 and self.y < 345:
             self.dir_y = 1
             self.dir_x = 0
         elif self.y == 345:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.y = random.randrange(461, 531)
+            self.y = random.randrange(462, 530)
             self.x = 800
         elif 460 < self.y < 532 and self.x > 100:
             self.dir_x = -1
             self.dir_y = 0
         elif self.x == 100 and 532 > self.y > 460:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.x = random.randrange(99, 100)
-        elif self.x < 100 and 392 <= self.y < 600:
+            self.x = random.randrange(10, 100)
+        elif self.x < 101 and 392 <= self.y < 600:
             self.dir_x = 0
             self.dir_y = 1
         elif self.x < 100 and self.y == 600:
             self.image = pygame.transform.rotate(self.image, 90)
-            self.y = random.randrange(630, 760)
+            self.y = random.randrange(631, 760)
         elif self.y > 630 and self.x < 650:
             self.dir_x = 1
             self.dir_y = 0
@@ -499,7 +503,7 @@ keep_going = True
 while keep_going:
     # Clock is set to 30 frames per second
     # If the user wants to quit the game, keep_going = False
-    clock.tick(30)
+    clock.tick(250)
     for ev in pygame.event.get():
         if ev.type == QUIT:
             keep_going = False
@@ -512,10 +516,10 @@ while keep_going:
         elif ev.type == MOUSEBUTTONDOWN:
             x_unadjusted = ev.pos[0]
             y_unadjusted = ev.pos[1]
-            x = (x_unadjusted // 35) * 35  # getting the x of where the mouse clicked
-            y = (y_unadjusted // 35) * 35  # getting the y of where the mouse clicked
-            if game_over:  # if the game is over, if the lower part of the screen is pressed, game is quitted
-                if y_unadjusted > 600:
+            x = (x_unadjusted // 35) * 35
+            y = (y_unadjusted // 35) * 35
+            if game_over:
+                if y_unadjusted > 550:
                     keep_going = False
             elif splash_screen:
                 y_selected = 20 < y < 50
@@ -535,6 +539,13 @@ while keep_going:
                     webbrowser.get().open('http://plus.google.com')
                 elif y_selected and 965 < x < 990:
                     webbrowser.get().open('http://www.instagram.com')
+            elif game_over:
+                if y > 400:
+                    game_over = False
+                    splash_screen = True
+                    settings_screen = False
+                    music = True
+                    pygame.mixer.music.rewind()
             elif settings_screen:
                 if (0 < x_unadjusted < 1015) and (320 - 30 < y_unadjusted < 435 + 30):
                     music = True
@@ -621,6 +632,7 @@ while keep_going:
     # Empty the bullet, ship and weapons sprites group
     # Re-blit the weapons prices
     if not pause:
+        number = -0
         ship_spawns += 1
         if ship_spawns == wave_interval or len(ship_group) == 0:
             ship_group.add(Ship(100, 173))
@@ -631,19 +643,17 @@ while keep_going:
                 tank_price += 500
                 missile_price += 1000
                 mine_price += 75000
-                if level == 2:
+                number += 10
+                if level == 10:
                     game_over = True
                 else:
-                    level = 2
-                    money += 2000
-                    wave_interval = 700
-                    player_group.empty()
-                    ship_group.empty()
-                    bullet_group.empty()
+                    change = True
+                    level += 1
+                    money += 5000
+                    wave_interval = 700 - number
                     tank_cost = font.render(("$" + str(tank_price)).center(18), True, black)
                     missile_cost = font.render(("$" + str(missile_price)).center(18), True, black)
                     mine_cost = font.render(("$" + str(mine_price)).center(18), True, black)
-                    pause = True
             wave_interval = int(wave_interval)
 
     # Get status of music
@@ -744,7 +754,7 @@ while keep_going:
     if chances == 0:
         pause = True
         game_over = True
-        chances = 3
+        chances = 50000
         player_group.empty()
         ship_group.empty()
         bullet_group.empty()
@@ -876,3 +886,4 @@ while keep_going:
 
     # Flip the display program so that the user can see the screen and the images
     pygame.display.flip()
+
